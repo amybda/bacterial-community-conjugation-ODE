@@ -1,7 +1,7 @@
 # Make a more user-friendly interface than the pure class code or the Jupyter notebook
 
 # Import modules
-from ODE_model import ode_lotka  # noqa: I001
+from ODEmodel.ode_model import ode_lotka  # noqa: I001
 import os
 import pandas as pd
 import numpy as np
