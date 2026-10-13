@@ -1,7 +1,9 @@
-ODE\-model.ODE\_model module
+Model Code
 ============================
 
-.. automodule:: ODE-model.ODE_model
+.. currentmodule:: ODEmodel
+
+.. automodule:: ODE_model
    :members:
    :show-inheritance:
    :undoc-members:
