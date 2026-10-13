@@ -1,19 +1,10 @@
 ODEmodel package
 ================
 
-Submodules
-----------
-
-.. toctree::
-   :maxdepth: 4
-
-   ODEmodel.ODE_model
-   ODEmodel.app
-
-Module contents
+ODE Lotka
 ---------------
 
-.. automodule:: ODEmodel
+.. autoclass:: ode_lotka
    :members:
    :show-inheritance:
    :undoc-members:
