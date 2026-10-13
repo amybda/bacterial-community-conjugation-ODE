@@ -17,4 +17,4 @@ All the code for this model is located in the folder ``ODE-model``. The class co
    :maxdepth: 2
    :caption: Contents:
 
-   core
+   ODEmodel
