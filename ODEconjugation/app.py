@@ -225,7 +225,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 ##### Parameters
                                 <u>Parameters for the interaction matrix</u>
                                 - `connectivity` (probability of interactions): 1
-                                - `sigma` (interspecies interaction strength standard deviation): 0.075
+                                - `sigma` (interspecies interaction strength standard deviation): 0.04
                                 - `P_m` (proportion of species reactions that are positive): 0
                                 - `self_inhibition` (intra-specific interaction strength): 0.1
                                 - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -247,7 +247,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 <br><u>Parameters for the model</u>
                                 - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                 - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.2
+                                - `susceptibility` (community): 0.5
                                 - `drug_level` (magnitude of perturbation): 0.5""")
                         ui.markdown("""This example simulation lets you play around with different numbers of 'commensal' species in the community, and the starting densities for each species. In this example, after the initial population densities are introduced, the simulation is allowed to find an equilibrium for the first 500 timesteps before introducing the donor and recipient species, as well as the drug which perturbs the community. Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                     # Transconjugant final numbers
@@ -266,10 +266,10 @@ with ui.navset_card_pill(id="main_tabs"):
                     for i in range(1, input.params_n_species() + 1):
                         exec(f"params_x0.append(input.params_x0_spec{i}())")  # noqa: S102
                     # Determine susceptibility
-                    params_susceptibility = [0.05, 0.05, 0.05] + ([0.2] * input.params_n_species())
+                    params_susceptibility = [0.05, 0.05, 0.05] + ([0.5] * input.params_n_species())
                     # Run model
                     change_species = ode_lotka(input.params_n_species())  # initialise model
-                    change_species.randomise_interaction_matrix(connectivity=1, sigma=0.075, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_species.randomise_interaction_matrix(connectivity=1, sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_species_alpha.set( pd.DataFrame(change_species.alpha, columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_alpha_init = change_species_alpha.get()
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)), 
@@ -286,9 +286,9 @@ with ui.navset_card_pill(id="main_tabs"):
                     for i in range(1, input.params_n_species() + 1):
                         exec(f"params_x0.append(input.params_x0_spec{i}())")  # noqa: S102
                     # Determine susceptibility
-                    params_susceptibility = [0.05, 0.05, 0.05] + ([0.2] * input.params_n_species())
+                    params_susceptibility = [0.05, 0.05, 0.05] + ([0.5] * input.params_n_species())
                     # Run model
-                    change_species.randomise_interaction_matrix(connectivity=1, sigma=0.075, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_species.randomise_interaction_matrix(connectivity=1, sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_species_alpha.set( pd.DataFrame(change_species.alpha, columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)),
                                                        columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
@@ -359,7 +359,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.markdown("""
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.15
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -383,7 +383,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.2
+                                        - `susceptibility` (community): 0.5
                                         - `drug_level` (magnitude of perturbation): 0.5""")
                                 ui.markdown("""This example simulation lets you play around with different connectivity, $C$, proportions between species in the community. The more connected the community, the more of an impact the densities of each species will have on each other's growth and population density. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
@@ -392,10 +392,10 @@ with ui.navset_card_pill(id="main_tabs"):
                             # Set up parameters
                             global change_conn, change_conn_alpha_init, change_conn_r_init
                             params_x0 = [0.5, 0.5, 0, 1, 1, 1, 1, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2, 0.2, 0.2, 0.2, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5, 0.5, 0.5, 0.5, 0.5]
                             # Run model
                             change_conn = ode_lotka(n_species=5)  # initialise model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
                             change_conn_alpha_init = change_conn_alpha.get()
                             change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
@@ -408,7 +408,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
                             params_x0 = [0.5, 0.5, 0, 1, 1, 1, 1, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2, 0.2, 0.2, 0.2, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5, 0.5, 0.5, 0.5, 0.5]
                             # Run model
                             change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
@@ -499,7 +499,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.2
+                                        - `susceptibility` (community): 0.5
                                         - `drug_level` (magnitude of perturbation): 0.5""")
                                 ui.markdown("""This example simulation lets you play around with different strengths of interaction (drawn from a normal distribution with standard deviation $\\sigma$) between two community species and the donor/recipients, as well as the self-inhibition values, $s_i$, of all species. $s_i$ values on the diagonals of the matrix must be stronger negative interactions than those between other species for the ODE to be solvable. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
@@ -508,7 +508,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             # Set up parameters
                             global change_sigma_si, change_sigma_si_alpha_init, change_sigma_si_r_init
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_sigma_si = ode_lotka(n_species=1)  # initialise model
                             change_sigma_si.randomise_interaction_matrix(connectivity=1, sigma=input.params_sigma(), P_m=0, self_inhibition=input.params_s_i(), intrinsic_growth=1)  # initialise interaction matrix
@@ -524,7 +524,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_sigma_si.randomise_interaction_matrix(connectivity=1, sigma=input.params_sigma(), P_m=0, self_inhibition=input.params_s_i(), intrinsic_growth=1)  # initialise interaction matrix
                             change_sigma_si_alpha.set( pd.DataFrame(change_sigma_si.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -620,7 +620,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.2
+                                        - `susceptibility` (community): 0.5
                                         - `drug_level` (magnitude of perturbation): 0.5""")
                                 ui.markdown("""This example simulation lets you play around with different proportions of positive interactions, $P_m$, that fill the interaction matrix. Positive interactions between species means more cooperation, whereas more negative interactions means competition that will inhibit growth. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
@@ -629,7 +629,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             # Set up parameters
                             global change_Pm, change_Pm_alpha_init, change_Pm_r_init
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_Pm = ode_lotka(n_species=1)  # initialise model
                             change_Pm.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=input.params_Pm(), self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -645,7 +645,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_Pm.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=input.params_Pm(), self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_Pm_alpha.set( pd.DataFrame(change_Pm.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -715,7 +715,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.2
+                                        - `susceptibility` (community): 0.5
                                         - `drug_level` (magnitude of perturbation): 0.5""")
                                 ui.markdown("""This example simulation lets you play around with different intrinsic growth rates for each of the species, used to calculate $r$. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                          # Transconjugant final numbers
@@ -731,7 +731,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             global change_growth, change_growth_alpha_init, change_growth_r_init
                             params_growth = [input.params_growth_donor(), input.params_growth_recip(), input.params_growth_trans(), input.params_growth_spec1()]
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_growth = ode_lotka(n_species=1)  # initialise model
                             change_growth.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=params_growth)  # initialise interaction matrix
@@ -748,7 +748,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
                             params_growth = [input.params_growth_donor(), input.params_growth_recip(), input.params_growth_trans(), input.params_growth_spec1()]
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_growth.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=params_growth)  # initialise interaction matrix
                             change_growth_alpha.set( pd.DataFrame(change_growth.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -816,7 +816,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 - `x0` (initial community densities): 1
                                 - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                 - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.2
+                                - `susceptibility` (community): 0.5
                                 - `drug_level` (magnitude of perturbation): 0.5""")
                         ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community, allowing you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 2000`).  If `t_drug_removal = 2000`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run.""")
                 # Run model
@@ -825,7 +825,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     # Set up parameters
                     global change_tdrug, change_tdrug_alpha_init, change_tdrug_r_init
                     params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                     if input.params_tdrug_recovery() == 0: tdrug_recovery = None
                     else: tdrug_recovery = int(input.params_tdrug_recovery())
                     # Run model
@@ -843,7 +843,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 def _():
                     # Parameters for drug recovery
                     params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                     if input.params_tdrug_recovery() == 0: tdrug_recovery = None
                     else: tdrug_recovery = int(input.params_tdrug_recovery())
                     # Run model
@@ -927,7 +927,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.2""")
+                                        - `susceptibility` (community): 0.5""")
                                 ui.markdown("""This example simulation lets you play around with different drug strengths, $p$, on a scale between 0 and 1. The higher the drug strength, the stronger an effect it will have on the bacterial species. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run.  The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
@@ -935,7 +935,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             # Set up parameters
                             global change_drug_strength, change_drug_strength_alpha_init, change_drug_strength_r_init
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_drug_strength = ode_lotka(n_species=1)  # initialise model
                             change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -951,7 +951,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_drug_strength_alpha.set( pd.DataFrame(change_drug_strength.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -1015,7 +1015,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.input_slider(id='params_sus_donor', label='Donor', value=0.05, min=0, max=1, step=0.01, width='100%')
                                         ui.input_slider(id='params_sus_recip', label='Recipient', value=0.05, min=0, max=1, step=0.01, width='100%')
                                         ui.input_slider(id='params_sus_trans', label='Transconjugant', value=0.05, min=0, max=1, step=0.01, width='100%')
-                                        ui.input_slider(id='params_sus_spec1', label='Species A', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='params_sus_spec1', label='Species A', value=0.5, min=0, max=1, step=0.01, width='100%')
                                     ui.input_action_button(id='sus_new_alpha', label='Randomise a new interaction matrix', width='100%')
                                 # Transconjugant final numbers
                                 with ui.value_box(showcase=icon('bacteria'), theme="purple"):
@@ -1137,7 +1137,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 - `x0` (initial community densities): 1
                                 - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                 - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.2
+                                - `susceptibility` (community): 0.5
                                 - `drug_level` (magnitude of perturbation): 0.5""")
                         ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community. This allows you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 2000`).  If `t_drug_removal = 2000`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix generated for this run.""")
                 # Run model
@@ -1146,7 +1146,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     # Set up parameters
                     global change_tdr, change_tdr_alpha_init, change_tdr_r_init
                     params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                     # Run model
                     change_tdr = ode_lotka(n_species=1)  # initialise model
                     change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -1162,7 +1162,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 def _():
                     # Parameters
                     params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                     # Run model
                     change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdr_alpha.set( pd.DataFrame(change_tdr.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -1294,7 +1294,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `drug_strength`: 0.5
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.2""")
+                                        - `susceptibility` (community): 0.5""")
                                 ui.markdown("""This example simulation lets you play around with the parameters that inhibit conjugation, to identify the contributions of competitive interactions (values determined by $\\sigma$) vs spatial inhibition (given by $\\rho$) and the number of transconjugants formed. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
@@ -1302,7 +1302,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             # Set up parameters
                             global change_compare_conj, change_compare_conj_alpha_init, change_compare_conj_r_init
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_compare_conj = ode_lotka(n_species=1)  # initialise model
                             change_compare_conj.randomise_interaction_matrix(connectivity=1, sigma=input.params_compare_sigma(), P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -1318,7 +1318,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
                             params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                             # Run model
                             change_compare_conj.randomise_interaction_matrix(connectivity=1, sigma=input.params_compare_sigma(), P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_compare_conj_alpha.set( pd.DataFrame(change_compare_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -1377,7 +1377,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 - `x0` (initial community densities): 1
                                 - `drug_strength`: 0.5
                                 - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.2""")
+                                - `susceptibility` (community): 0.5""")
                         ui.markdown("""This example simulation lets you play around with different conjugation rates, $\\Gamma$, which is measured on a log scale. It also lets you adjust the strength of spatial inhibition, $\\rho$ on conjugation for the `proportion` method, where 0 means no spatial inhibition (only using the `simple` method). In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                 # Run model
                 @reactive.effect
@@ -1385,7 +1385,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     # Set up parameters
                     global change_conj, change_conj_alpha_init, change_conj_r_init
                     params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                     # Run model
                     change_conj = ode_lotka(n_species=1)  # initialise model
                     change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -1401,7 +1401,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 def _():
                     # Determine strength of interactions - needs lower interactions with more species to solve matrix
                     params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.2]
+                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
                     # Run model
                     change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_conj_alpha.set( pd.DataFrame(change_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
@@ -1619,7 +1619,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.update_numeric(id='n_species', value=1)
                         ui.update_numeric(id='x0_spec1', value=0.5)
                         ui.update_numeric(id='growth_spec1', value=1)
-                        ui.update_slider(id='sus_spec1',  value=0.2)
+                        ui.update_slider(id='sus_spec1',  value=0.5)
                     ui.input_action_button(id='set_to_hungate', label='Set parameters to recreate in vitro experiments with a simple oligo-mouse-microbiota-19 community', width='100%')
                     @reactive.effect
                     @reactive.event(input.set_to_hungate)
@@ -1650,7 +1650,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         for i in range(1,20):
                             exec(f"ui.update_numeric(id='x0_spec{i}', value=(1 + 0.5 * rd.random()))")  # noqa: S102
                             exec(f"ui.update_numeric(id='growth_spec{i}', value=1)")  # noqa: S102
-                            exec(f"ui.update_slider(id='sus_spec{i}',  value=(0.2 + 0.2 * rd.random()))")  # noqa: S102
+                            exec(f"ui.update_slider(id='sus_spec{i}',  value=(0.5 + 0.2 * rd.random()))")  # noqa: S102
 
             # All the species
             with ui.panel_conditional("input.n_species >= 1"):  # noqa: SIM117
@@ -1663,182 +1663,182 @@ with ui.navset_card_pill(id="main_tabs"):
                                 with ui.layout_columns(col_widths=(4,4,4)):
                                     ui.input_numeric(id='x0_spec1', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                     ui.input_numeric(id='growth_spec1', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                    ui.input_slider(id='sus_spec1', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                    ui.input_slider(id='sus_spec1', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 2"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species B Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec2', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec2', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec2', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec2', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 3"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species C Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec3', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec3', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec3', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec3', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 4"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species D Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec4', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec4', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec4', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec4', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 5"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species E Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec5', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec5', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec5', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec5', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 6"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species F Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec6', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec6', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec6', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec6', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 7"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species G Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec7', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec7', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec7', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec7', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 8"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species H Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec8', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec8', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec8', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec8', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 9"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species I Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec9', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec9', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec9', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec9', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 10"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species J Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec10', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec10', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec10', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec10', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 11"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species K Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec11', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec11', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec11', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec11', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 12"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species L Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec12', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec12', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec12', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec12', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 13"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species M Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec13', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec13', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec13', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec13', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 14"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species N Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec14', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec14', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec14', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec14', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 15"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species O Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec15', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec15', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec15', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec15', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 16"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species P Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec16', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec16', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec16', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec16', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 17"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species Q Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec17', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec17', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec17', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec17', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 18"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species R Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec18', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec18', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec18', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec18', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 19"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species S Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec19', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec19', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec19', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec19', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 20"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species T Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec20', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec20', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec20', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec20', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 21"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species U Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec21', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec21', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec21', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec21', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 22"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species V Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec22', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec22', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec22', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec22', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 23"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species W Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec23', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec23', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec23', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec23', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 24"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species X Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec24', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec24', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec24', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec24', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 25"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species Y Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec25', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec25', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec25', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec25', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
                             with ui.panel_conditional("input.n_species >= 26"):  # noqa: SIM117
                                 with ui.card():
                                     with ui.card_header(): ui.markdown("""###### Species Z Parameters""")
                                     with ui.layout_columns(col_widths=(4,4,4)):
                                         ui.input_numeric(id='x0_spec26', label='Starting Density', value=1, min=0.01, step=0.01, width='100%')
                                         ui.input_numeric(id='growth_spec26', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
-                                        ui.input_slider(id='sus_spec26', label='Susceptibility', value=0.2, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='sus_spec26', label='Susceptibility', value=0.5, min=0, max=1, step=0.01, width='100%')
 
             # Transconjugant final numbers
             with ui.value_box(showcase=icon('bacteria'), theme="purple"):
