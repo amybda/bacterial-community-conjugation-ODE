@@ -1629,7 +1629,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.update_slider(id='connectivity', value=0.9)
                         ui.update_slider(id='Pm', value=0.1)
                         ui.update_slider(id='s_i', value=0.1)
-                        ui.update_slider(id='sigma', value=0.075)
+                        ui.update_slider(id='sigma', value=0.04)
                         # Drugs
                         ui.update_slider(id='tdrug', value=0)
                         ui.update_slider(id='tdrug_recovery', value= int(500 + (5/24*500)))
