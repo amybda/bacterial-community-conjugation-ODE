@@ -62,7 +62,7 @@ class ode_lotka:
             C[C > (1-connectivity)] = 1   # set values above connectivity to 1 (are interacting)
             C[C <= (1-connectivity)] = 0  # set values below connectivity to 0 (are not interacting)
             # Randomly assign species interaction strengths between 0 and -1 (assume negative interaction)
-            interspecies_interaction = (sigma * abs(rd.uniform(size=(self.n_species, self.n_species)))) * -1  # set random species interactions
+            interspecies_interaction = (sigma * abs(rd.randn(self.n_species, self.n_species))) * -1  # set random species interactions
             alpha = np.multiply(C, interspecies_interaction)  # give only connected populations the species interactions
             # Randomly set a proportion of those with positive interactions
             alpha[np.identity(self.n_species) == 1] = 0  # set diagonals to 0 to ignore these values
@@ -193,9 +193,9 @@ class ode_lotka:
         steady_state : np.array
             the steady_state value used to calculate the growth rates - the adjusted inputted intrinsic_growth"""
         if type(intrinsic_growth) == float or type(intrinsic_growth) == int:
-            steady_state = abs(np.ones(self.n_species) * intrinsic_growth + 0.005*rd.random(self.n_species))  # taking the steady state growth condition and adding some random noise
+            steady_state = abs(np.ones(self.n_species) * intrinsic_growth + 0.001*rd.random(self.n_species))  # taking the steady state growth condition and adding some random noise
         else: 
-            steady_state = abs(np.array(intrinsic_growth) + 0.005*rd.random(self.n_species))  # taking the steady state growth condition and adding some random noise
+            steady_state = abs(np.array(intrinsic_growth) + 0.001*rd.random(self.n_species))  # taking the steady state growth condition and adding some random noise
         # Legacy - recipient and transconjugant (and potentially donor) have same interaction matrix params - edit growth rates to prevent double/triple the instrinsic growth provided
         # divide = 2  # default is growth rates becoming double what user entered
         # if donor_equal_recipient:  # if recipient also equals donor
