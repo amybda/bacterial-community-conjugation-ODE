@@ -21,8 +21,7 @@ setup(name='ODEconjugation',
                         'plotly',
                         'shiny',
                         'shinywidgets',
-                        'faicons',
-                        'htmltools'],
+                        'faicons'],
       extras_require={'docs': ['sphinx>=1.5, !=1.7.3',  # Sphinx for doc generation (v.1.7.3 has a bug)
                                'sphinx_rtd_theme']},
       license='GPLv3')
