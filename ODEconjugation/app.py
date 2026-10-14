@@ -36,10 +36,10 @@ ui.page_opts(title="ODE-Based Modelling of Conjugation in a Bacterial Community 
 # --- FILEPATHS ---
 # File paths
 project_root = os.path.dirname(__file__)
-if os.path.isdir(os.path.join(project_root, "Data")):
-    data_dir = os.path.join(project_root, "Data")
+if os.path.isdir(os.path.join(project_root, "data")):
+    data_dir = os.path.join(project_root, "data")
 else:
-    data_dir = os.path.join(os.path.dirname(project_root), "outputs")
+    data_dir = os.path.join(os.path.dirname(project_root), "data")
 
 
 # --- SHARED VARIABLES ---
