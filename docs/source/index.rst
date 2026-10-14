@@ -11,7 +11,39 @@ There are multiple different modelling approaches for studying the microbiome (`
 
 How to Use This Code
 -------------------------
-All the code for this model is located in the folder ``ODE-model``. The class containing the functions to run the model is in ``ODE_model.py`` as a class, with details on how the functions within it work below.
+All the code for this model is contained in the folder ``ODEconjugation``. . Within this folder is:
+::
+|-- data
+|-- figures
+|-- app.py
+|-- modelling-ODE.ipynb
+|-- ode-model.py
+::
+
+Run Scripts Locally on Your Computer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you want full freedom to run and explore the code contained in this repository, you can run the code locally on your computer.
+1. Download this repository to your computer
+2. Install the requirements in your Python environment of choice using ``pip install ./`` from within the repository folder
+3. A walkthrough of how the code works is located in the Jupyter Notebook ``modelling-ODE.ipynb``, with details on the background and step-by-step explanations of all the parameters
+4. Otherwise, you can create your own Python script to run the code
+
+Run Local App on Your Computer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+If you want to explore the code on your computer, using a user-friendly GUI you can use the webapp. Just like the Jupyter Notebook, it contains details on the background, step-by-step explainations of all the parameters, and an opportunity to create your own custom simulations.
+1. Download this repository to your computer
+2. Install the requirements in your Python environment of choice using ``pip install ./`` from within the repository folder
+3. In your environment, using an application like VScode that is able to support Shiny apps, run ``app.py``
+
+Run Online in Browser
+^^^^^^^^^^^^^^^^^^^^^^^
+If you want to be able to do the above, the simplest method is to simply run in browser
+1. Go to the GitHub page in your browser
+
+
+The Code
+----------
+The class containing the functions to run the model is in ``ODE_model.py`` as a class, with details on how the functions within it work below.
 
 .. toctree::
    :maxdepth: 2

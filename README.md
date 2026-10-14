@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/bacterial-community-conjugation-ode/badge/?version=latest)](https://bacterial-community-conjugation-ode.readthedocs.io/en/latest/?badge=latest)
+
 # ODE-Based Modelling of Conjugation in a Bacterial Community in Response to Drug Perturbation
 
 The experiment we are working on is to determining the effect of various drugs on the gut microbiome, which then may enable or prevent the spread of antibiotic resistance genes (ARGs). The current theory is that if drugs such as antibiotics successfully peturb the microbiome, if the donor and recipient are resistant, they can overgrow, increasing the odds they would come in contact with each other, allowing conjugation to occur. We also want to understand the influence of spatial structure within the gut - where different species are localised in the gut microbiome - on this phenomenon. While we are currently conducting in vitro and in vivo mouse experiments, we would also like to develop a model which explores the dynamics of this.
@@ -6,19 +8,26 @@ There are multiple different modelling approaches for studying the microbiome ([
 
 
 ## How to Use This Code
-The code to run the ODE model is located in `ODE_model.py` as a class.
+All the code for this model is contained in the folder ``ODEconjugation``. Within this folder is:
+```
+|-- data
+|-- figures
+|-- app.py
+|-- modelling-ODE.ipynb
+|-- ode-model.py
+```
 
-### Run Scripts Locally on Your Computer
+## Run Scripts Locally on Your Computer
 If you want full freedom to run and explore the code contained in this repository, you can run the code locally on your computer.
 1. Download this repository to your computer
-2. Install the requirements in your Python environment of choice from `requirements.txt`
+2. Install the requirements in your Python environment of choice using `pip install ./` from within the repository folder
 3. A walkthrough of how the code works is located in the Jupyter Notebook `modelling-ODE.ipynb`, with details on the background and step-by-step explanations of all the parameters
-4. Otherwise, you can create your own Python script to run the code - documentation for all the code is located at ReadtheDocs
+4. Otherwise, you can create your own Python script to run the code - documentation for all the code is located at [ReadtheDocs](https://bacterial-community-conjugation-ode.readthedocs.io/en/latest/)
 
 ### Run Local App on Your Computer
 If you want to explore the code on your computer, using a user-friendly GUI you can use the webapp. Just like the Jupyter Notebook, it contains details on the background, step-by-step explainations of all the parameters, and an opportunity to create your own custom simulations.
 1. Download this repository to your computer
-2. Install the requirements in your Python environment of choice from `requirements.txt`
+2. Install the requirements in your Python environment of choice using `pip install ./` from within the repository folder
 3. In your environment, using an application like VScode that is able to support Shiny apps, run `app.py`
 
 ### Run Online in Browser
