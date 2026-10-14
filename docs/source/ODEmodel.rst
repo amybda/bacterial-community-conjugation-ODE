@@ -1,14 +1,14 @@
-ODEmodel package
+ODEmodel
 ================
 
 .. currentmodule:: ODEmodel
 
-The code to run the module is in:
+This file contains all the code to run the module, outlined in:
 
 - :class:`ode_lotka`
 
 
-.. autoclass:: ode_lotka
+.. automodule:: ode_model
    :members:
    :show-inheritance:
    :undoc-members:

@@ -16,11 +16,17 @@ class ode_lotka:
 
     def __init__(self, n_species):
         """Initialise the class, with the number of species you want to have in the community.
-        Parameters:
-            n_species (int): the number of species in the community (excluding the donor, recipient and transconjugant populations)
-            good_alpha (boolean): indicates if the interaction matrix array is set up nicely
-            alpha (array): an n_species x n_species matrix of interaction coefficients, with the -self_inhibition as the diagonal matrix
-            r (array): intrinsic growth rates (or death rates when negative) measuring the growth/decline of population i when growing alone at low density"""
+        
+        Parameters
+        -----------
+        n_species : integer
+            the number of species in the community (excluding the donor, recipient and transconjugant populations)
+        good_alpha : boolean
+            indicates if the interaction matrix array is set up nicely
+        alpha : np.array
+            an n_species x n_species matrix of interaction coefficients, with the -self_inhibition as the diagonal matrix
+        r : np.array
+            intrinsic growth rates (or death rates when negative) measuring the growth/decline of population i when growing alone at low density"""
         self.n_species = 3 + n_species  # donor, recipient and transconjugant + chosen number of species in community
         self.good_alpha = 0
         self.alpha = np.zeros([n_species, n_species])
@@ -28,14 +34,26 @@ class ode_lotka:
     
     def randomise_interaction_matrix(self, connectivity, sigma, P_m, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
         """A function that randomly populates the interaction matrix, based on certain input parameters. 
-        It will repeat until it creates a matrix that will have a dynamic equilibrium (is stable).
-        Inputs:
-            connectivity (float): proportion of populations that have interactions with each other (between 0-1)
-            sigma (float): the standard deviation of the normal distribution where the strength of interactions between populations is pulled
-            P_m (float): proportion of those interacting species that have positive interactions instead of negative
-            self_inhibition (float): intra-specific interaction strength (assume a negative interaction with self)
-            intrinsic_growth (float/list): the intrinsic growth rate we'd like to find at steady state for, default 1 - if float, apply to all, if list, use value for each
-            donor_equal_recipient (float): determines whether the donor and recipient values should be set as the same thing, to reduce variability, default True"""
+        It will repeat until it creates a matrix that will have a dynamic equilibrium (is stable) or if it is looped
+        over 50600 times, in which case it will prompt the entry of new interaction matrix parameters to try to create
+        a more solveable matrix. A matrix is determined as solvable if the maximum eigenvalue of its Jacobian is less than 0.
+        
+        Parameters
+        -----------
+        connectivity : float
+            proportion of populations that have interactions with each other (between 0-1)
+        sigma : float
+            the standard deviation of the normal distribution where the strength of interactions between populations is pulled
+        P_m : float
+            proportion of those interacting species that have positive interactions instead of negative
+        self_inhibition : float
+            intra-specific interaction strength (assume a negative interaction with self)
+        intrinsic_growth : float or list of float, default=1
+            the intrinsic growth rate we'd like to find at steady state for
+            if the value is a float, apply it to all species
+            if the value is a list, use each indexed value for each species
+        donor_equal_recipient : boolean, default=True
+            determines whether the donor and recipient values should be set as the same species (reducing variability) or different species"""
         self.good_alpha = 0  # reset alpha to allow new reassignment if necessary
         checks = 0
         while self.good_alpha == 0:  # repeat until the matrix is stable
@@ -79,11 +97,19 @@ class ode_lotka:
 
     def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
         """A function that allows custom entry of an interaction matrix, and self inhibition rates, and then will calculate the growth rate and ensure it is stable.
-        Parameters:
-            alpha (array): the interaction matrix we'd like to use for the equations
-            self_inhibition (float): intra-specific interaction strength (assume a negative interaction with self)
-            intrinsic_growth (float/list): the intrinsic growth rate we'd like to find at steady state for, default 1 - if float, apply to all, if list, use value for each
-            donor_equal_recipient (float): determines whether the donor and recipient values should be set as the same thing, to reduce variability, default True"""
+        
+        Parameters
+        -----------
+        alpha : np.array
+            the interaction matrix we'd like to use for the equations
+        self_inhibition : float
+            intra-specific interaction strength (assume a negative interaction with self)
+        intrinsic_growth : float or list of float, default=1
+            the intrinsic growth rate we'd like to find at steady state for
+            if the value is a float, apply it to all species
+            if the value is a list, use each indexed value for each species
+        donor_equal_recipient : boolean, default=True
+            determines whether the donor and recipient values should be set as the same species (reducing variability) or different species"""
         self.good_alpha = 0  # reset alpha to allow new reassignment if necessary
         # Check the matrix is the correct size
         if alpha.shape != (self.n_species, self.n_species):
@@ -114,42 +140,64 @@ class ode_lotka:
         """A function that allows you to set the interaction matrix, self inhibition rates, and growth rates without altering or checking it is stable.
         This is the most simplified version of setting it - use with caution as it may not always work.
         Use for reproducibility if you've created a set you know works and want to reuse it across tests.
-         Parameters:
-            alpha (array): the interaction matrix we'd like to use for the equations (assume self-inhibition rate is along diagonals of this alpha)
-            intrinsic_growth (float/list): the intrinsic growth rate we'd like to assign - if float, apply to all, if list, use value for each
-            good_alpha (boolean): whether or not to accept the inputted matrix"""
+        
+        Parameters
+        -----------
+        alpha : np.array
+            the interaction matrix we'd like to use for the equations
+        intrinsic_growth : float or list of float, default=1
+            the intrinsic growth rate we'd like to find at steady state for
+            if the value is a float, apply it to all species
+            if the value is a list, use each indexed value for each species"""
         self.alpha = alpha  # initialise interaction matrix
         self.r = intrinsic_growth  # set growth rate
-        self.good_alpha = 1  # accept manual values
+        self.good_alpha = 1  # forces acceptance of manual values
 
     def upload_interaction_matrix_r(self, filepath):
         """A function that uses the interaction matrix and r from a file.
-        Parameters:
-            filepath (str): the filepath the interaction matrix and r should be saved to. They will have the suffix *_alpha.csv or *_r.csv respectively"""
+        
+        Parameters
+        -----------
+        filepath : string
+            the filepath the interaction matrix and r should be read from - they will have the suffix ``*_alpha.csv`` or ``*_r.csv`` respectively"""
         self.alpha = np.loadtxt(f'{filepath}_alpha.csv', delimiter=',')  # initialise interaction matrix
         self.r = np.loadtxt(f'{filepath}_r.csv', delimiter=',')  # set growth rate
         self.good_alpha = 1  # accept manual values
 
     def save_interaction_matrix_r(self, filepath):
         """A function that saves the interaction matrix and r to a file.
-        Parameters:
-            filepath (str): the filepath the interaction matrix and r should be saved to. They will have the suffix *_alpha.csv or *_r.csv respectively"""
+        
+        Parameters
+        ----------
+        filepath : str
+            the filepath the interaction matrix and r should be saved to
+            they will have the suffix *_alpha.csv or *_r.csv respectively"""
         np.savetxt(f'{filepath}_alpha.csv', self.alpha, delimiter=',')
         np.savetxt(f'{filepath}_r.csv', self.r, delimiter=',')
 
-    def get_growth_rate(self, alpha, intrinsic_growth, donor_equal_recipient):
+    def get_growth_rate(self, alpha, intrinsic_growth):
         """Calculates the intrinsic growth rate based on self-inhibition rate (taken from the full interaction matrix to maximise the odds of a stable equilibrium).
-        r is calculated as the matrix multiplication of the alpha and the steady state.
-        The steady state is taken as ~intrinsic_growth rate, as we assume the community has a linearly asymptotically stable equilibrium at x_1 ~ intrinsic_growth
-        Parameters:
-            alpha (array): the interaction matrix we'd like to use for the equations
-            intrinsic_growth (float/list): the intrinsic growth rate we'd like to find at steady state for - if float, apply to all, if list, use value for each
-            donor_equal_recipient (float): determines whether the donor and recipient values should be set as the same thing, to reduce variability"""
+        r is calculated as the matrix multiplication of ``alpha`` and the steady state.
+        The `steady_state` is taken as ~ ``intrinsic_growth`` rate, as we assume the community has a linearly asymptotically stable equilibrium at ``x_1`` ~ ``intrinsic_growth``
+       
+        Parameters
+        -----------
+        alpha : np.array
+            the interaction matrix we'd like to use for the equations
+        intrinsic_growth : float or list of float, default=1
+            the intrinsic growth rate we'd like to find at steady state for
+            if the value is a float, apply it to all species
+            if the value is a list, use each indexed value for each species
+        
+        Returns
+        --------
+        steady_state : np.array
+            the steady_state value used to calculate the growth rates - the adjusted inputted intrinsic_growth"""
         if type(intrinsic_growth) == float or type(intrinsic_growth) == int:
             steady_state = abs(np.ones(self.n_species) * intrinsic_growth + 0.005*rd.random(self.n_species))  # taking the steady state growth condition and adding some random noise
         else: 
             steady_state = abs(np.array(intrinsic_growth) + 0.005*rd.random(self.n_species))  # taking the steady state growth condition and adding some random noise
-        # Recipient and transconjugant (and potentially donor) have same interaction matrix params - edit growth rates to prevent double/triple the instrinsic growth provided
+        # Legacy - recipient and transconjugant (and potentially donor) have same interaction matrix params - edit growth rates to prevent double/triple the instrinsic growth provided
         # divide = 2  # default is growth rates becoming double what user entered
         # if donor_equal_recipient:  # if recipient also equals donor
         #     divide = 3  # growth rates would end up triple what user entered
@@ -161,9 +209,19 @@ class ode_lotka:
 
     def get_stability(self, alpha, steady_state):
         """Calculates the stability from the Jacobian of the alpha and the self-inhibition rate, based on eigenvalues.
-        Parameters:
-            alpha (array): the interaction matrix we'd like to use for the equations
-            steady_state (array): the steady state used in calculating the growth rate, r"""
+        
+        Parameters
+        -----------
+        alpha : np.array
+            the interaction matrix we'd like to use for the equations
+        steady_state : np.array
+            the steady_state value used to calculate the growth rates - the adjusted inputted intrinsic_growth
+        
+        Returns
+        --------
+        stability : float
+            the maximum eigenvalue of the Jacobian of the interaction matrix
+            if this is less than 0, then the matrix is likely to be stable"""
         jacobian = np.multiply(alpha,  np.tile(steady_state.T, [self.n_species,1]))  # calculates the Jacobian
         stability = max(np.linalg.eig(jacobian).eigenvalues.real)  # gets the eigenvalues to determine stability
         return stability
@@ -175,20 +233,34 @@ class ode_lotka:
 
     def lotka_drug_plasmid(self, t, X, conjugation_rate, susceptibility, drug_level, plasmid_method='simple', prop_strength=1):
         """The generalised Lotka-Volterra ODE equation to be solved, with terms added for plasmid transfer and drug perturbation.
-        Parameters:
-            t (int): timestep, to be used by the ode integrator
-            X (array): an array of the initial growth for each species in the community
-                    X[0] - the donor
-                    X[1] - the recipient
-                    X[2] - the transconjugant - generally 0 at start of experiment
-                    X[3:] - the rest of the species communities
-            conjugation_rate (float): plasmid conjugation rate
-            susceptibility (float): susceptibility of the communities to the drug perturbation
-            drug_level (arr): the level of strength of the drug perturbation over time
-            plasmid_method (str): method that plasmids are transferred
-                - simple: only considers the number of potential recipients and donors
-                - proportion: takes into account recipients and donors in total population and how other species might block contact
-            prop_strength (float): if using the 'proportion' plasmid_method, the strength of the effect of the proportion, from 0-1"""
+        
+        Parameters
+        -----------
+        t : integer
+            timestep, the current timestep being solved by the ode integrator
+        X : np.array
+            an array of the population density at the given timestep for each species in the community
+            - X[0] - the donor
+            - X[1] - the recipient
+            - X[2] - the transconjugant - generally 0 at start of experiment
+            - X[3:] - the rest of the species communities
+        conjugation_rate : float
+            plasmid conjugation rate
+        susceptibility : float
+            susceptibility of the communities to the drug perturbation, from 0-1)
+        drug_level : np.array
+            the level of strength of the drug perturbation over time, the values in the array from 0-1
+        plasmid_method : string, default='simple'
+            method that plasmids are transferred
+            - simple: only considers the number of potential recipients and donors
+            - proportion: takes into account recipients and donors in total population and how other species might block contact
+        prop_strength : float, default=1
+            if using the 'proportion' plasmid_method, the strength of the effect of spatial inhibition, from 0-1
+        
+        Returns
+        --------
+        change_in_density : np.array
+            an array of the the change in population density from initial population density X at between timestep t-1 and t"""
         dXdt = X * (self.r + np.matmul(self.alpha, X)) # calculate growth rates
         # Calculate plasmid transfer
         if plasmid_method == 'equilibrium':
@@ -211,9 +283,13 @@ class ode_lotka:
         """The simplest form of conjugation rates, just considering:
         - number of transconjugants based on number of recipients that can become transconjugants
         - number of donors that they can recieve the plasmid from
-        Parameters:
-            X (array): an array of the initial growth for each species in the community
-            conjugation_rate (float): plasmid conjugation rate"""
+        
+        Parameters
+        -----------
+        X : np.array
+            an array of the population density at the given timestep for each species in the community
+        conjugation_rate : float
+            plasmid conjugation rate"""
         return X[1] * (conjugation_rate*(X[0] + X[2]))  # calculates the transfers based on number of recipients and how many they can receive from (donors + transconjugants)
     
     @staticmethod
@@ -222,10 +298,15 @@ class ode_lotka:
         - number of transconjugants based on number of recipients that can become transconjugants
         - number of donors that they can recieve the plasmid from
         - the proportion of these compared to the rest of the population, that might block them from physically coming into contact
-        Parameters:
-            X (array): an array of the initial growth for each species in the community
-            conjugation_rate (float): plasmid conjugation rate
-            prop_strength (float): the strength of the effect of the proportion"""
+        
+        Parameters
+        -----------
+        X : np.array
+            an array of the population density at the given timestep for each species in the community
+        conjugation_rate : float
+            plasmid conjugation rate
+        prop_strength : float, default=1
+            if using the 'proportion' plasmid_method, the strength of the effect of spatial inhibition, from 0-1"""
         plasmid_transfer = X[1] * (conjugation_rate*(X[0] + X[2]))  # calculates the transfers based on number of recipients and how many they can receive from (donors + transconjugants)
         prop_donor = (X[0] + X[2])/np.sum(X)  # taking into account proportion of donors
         prop_recipient = X[1] / np.sum(X)  # and recipients
@@ -234,25 +315,37 @@ class ode_lotka:
     
     def solve_ode(self, t_start, t_end, x0, conjugation_rate, susceptibility, drug_level, equilibrium=True, plasmid_method='simple', prop_strength=1, t_dr=0, t_drug=0, t_drug_recovery=None):
         """The ode solver to get the results of the simulation. First checks the lists are the correct length, then allows the ode solver to run.
-        Parameters:
-            t_start (int): the start timestep
-            t_end (int): the ending timestep
-            x0 (array): an array of the initial growth for each species in the community
-                        x0[0] - the donor
-                        x0[1] - the recipient
-                        x0[2] - the transconjugant
-                        x0[3:] - the rest of the species communities
-            conjugation_rate (float): plasmid conjugation rate
-            susceptibility (float): susceptibility of the communities to the drug perturbation
-            drug_level (float): the level of strength of the drug perturbation
-            equilibrium (boolean): whether or not to include the step for finding equilibrium
-            plasmid_method (str): method that plasmids are transfered
-                - simple: only considers the number of potential recipients and donors
-                - proportion: takes into account recipients and donors in total population and how other species might block contact
-            prop_strength (float): if using the 'proportion' plasmid_method, the strength of the effect of the proportion, from 0-1
-            t_dr (int): the time the donor and the recipient are introduced into the community (default is 0, start of the simulation)
-            t_drug (int): the time the drug should be introduced (default is 0, start of the simulation)
-            t_drug_recovery (int): the time the drug should be removed from the simulation (default is never, still acting on the community until the end)"""
+        
+        Parameters
+        -----------
+        t_start : integer
+            the starting timestep
+        t_end : integer
+            the ending timestep
+        x0 : np.array
+            an array of the initial population densities of each species in the community
+            - X[0] - the donor
+            - X[1] - the recipient
+            - X[2] - the transconjugant - generally 0 at start of experiment
+            - X[3:] - the rest of the species communities
+        conjugation_rate : float
+            plasmid conjugation rate
+        susceptibility : float
+            susceptibility of the communities to the drug perturbation, from 0-1)
+        drug_level : np.array
+            the level of strength of the drug perturbation over time, the values in the array from 0-1
+        plasmid_method : string, default='simple'
+            method that plasmids are transferred
+            - simple: only considers the number of potential recipients and donors
+            - proportion: takes into account recipients and donors in total population and how other species might block contact
+        prop_strength : float, default=1
+            if using the 'proportion' plasmid_method, the strength of the effect of spatial inhibition, from 0-1
+        t_dr : integer, default=0
+            the time the donor and the recipient are introduced into the community, typically the start of the simulation
+        t_drug : integer, default=0
+            the time the drug should be introduced, typically the start of the simulation
+        t_drug_recovery : integer, default=None
+            the time the drug should be removed from the simulation, typically it is still acting on the community until the end of the simulation"""
         # Do not run simulation if there are problems with lengths of input lists - make errors clearer
         if (len(susceptibility) != self.n_species) & (len(x0) != self.n_species):
             print(f'Your susceptibility list is {len(susceptibility)} long, and your starting growth rate is {len(x0)}.')
@@ -326,18 +419,29 @@ class ode_lotka:
                     self.results.t = np.concat([self.results.t, results.t[1:]], axis=0)
                     self.results.y = np.concat([self.results.y, results.y[:,1:]], axis=1)
         
-    def plot_results(self, t, y, title, figsize=(7,6), save_fig=False, filename='equilibrium', drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=25):
+    def plot_results(self, t, y, title, figsize=(7,6), save_fig=False, filename='equilibrium', drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
         """Plots the graph of the community finding equilibrium, and potentially saves the figure.
-        Parameters:
-            t (array): the array of timepoints
-            y (array): the array of the population sizes
-            title (str): title for the graph
-            figsize (tuple):: the size of the figure to be outputted
-            save_fig (boolean): defines if the figure should be saved for later
-            filename (str): the filename if the figure is saved
-            drt_colours (list): the colours to use for the donor, recipient, and transconjugants (should be distinct from the rest of the colour cycle)
-            cmap (colourmap): the colourmap to use for matplotlib
-            max_colours (int): the maximum colours to divide the cmap into"""
+        
+        Parameters
+        -----------
+        t : np.array
+            the array of timepoints
+        y : np.array
+            the array of the population sizes
+        title : string
+            the title to use for the graph
+        figsize : tuple, default=(7,6)
+            the size of the figure to be outputted
+        save_fig : boolean, default=False
+            determines if the figure should be saved to files
+        filename : string, default='equilibrium'
+            the filename if the figure is saved
+        drt_colours : list, default=['magenta', 'b', 'black']
+            the colours to use when plotting the donor, recipient, and transconjugants (should be distinct from the rest of the colour cycle)
+        cmap : colourmap, default='Spectral'
+            the continuous colourmap to use when plotting the species in the community in matplotlib
+        max_colours : integer, default=26
+            the maximum number of discrete colours to divide the cmap into"""
         fig, ax = plt.subplots(figsize=figsize)
         ax.set_prop_cycle(self.set_colours(drt_colours, cmap, max_colours))
         plt.plot(t, y, label = ['Donor', 'Recipient', 'Transconjugants'] + [f'Species {i+1}' for i in range(self.n_species-3)])
@@ -352,31 +456,69 @@ class ode_lotka:
 
     def next_color(self, i, cmap, max_colours):
         """Gets distinct colours from a colourmap.
-        Parameters:
-            cmap (colourmap): the colourmap to use for matplotlib
-            max_colours (int): the maximum colours to divide the cmap into"""
+        
+        Parameters
+        -----------
+        i : integer
+            the number of species that each need a distinct colour
+        cmap : colourmap
+            the continuous colourmap to use when plotting the species in the community in matplotlib
+        max_colours : integer
+            the maximum colours to divide the cmap into
+        
+        Returns
+        --------
+        cmap : colourmap
+            the list of colours to use, with an entry for each species"""
         return cmap(((5 * i) % max_colours) / max_colours)
 
     def set_colours(self, drt_colours, cmap, max_colours):
         """Sets the colours for the graphs.
-        Parameters:
-            drt_colours (list): the colours to use for the donor, recipient, and transconjugants (should be distinct from the rest of the colour cycle)
-            cmap (colourmap): the colourmap to use for matplotlib
-            max_colours (int): the maximum colours to divide the cmap into"""
+        
+        Parameters
+        -----------
+        drt_colours : list, default=['magenta', 'b', 'black']
+            the colours to use when plotting the donor, recipient, and transconjugants (should be distinct from the rest of the colour cycle)
+        cmap : colourmap, default='Spectral'
+            the continuous colourmap to use for the species in the community in matplotlib
+        max_colours : integer, default=26
+            the maximum number of discrete colours to divide the cmap into
+        
+        Returns
+        --------
+        cycler : cycler
+            a list of all the colours to use for each of the species when plotting"""
         cmap = plt.get_cmap(cmap, lut=max_colours)
         colours = [self.next_color(i, cmap, max_colours) for i in range(self.n_species-3)]
         colours = [mcolors.to_hex(c) for c in colours]
         return cycler(color = drt_colours + colours)
     
     def determine_species_growth_rates(self, conjugation_rate, plasmid_method='simple', prop_strength=1):
-        """Determines the difference between clonal expansion and actual conjugation within the transconjugant population.
-        This method recalculates the plasmid_transfer term using the relevant method, and compares to the growth rates of species.
-        Parameters:
-            conjugation_rate (float): plasmid conjugation rate
-            plasmid_method (str): method that plasmids are transfered
-                - simple: only considers the number of potential recipients and donors
-                - proportion: takes into account recipients and donors in total population and how other species might block contact
-            prop_strength (float): if using the 'proportion' plasmid_method, the strength of the effect of the proportion, from 0-1"""
+        """Determines the difference between clonal expansion and actual conjugation within the transconjugant population. This method recalculates the ``plasmid_transfer`` term using the relevant method, and compares to the growth rates of species.
+       
+        Parameters
+        ------------
+        conjugation_rate : float
+            plasmid conjugation rate for determining just plasmid transfer
+        plasmid_method : string, default='simple'
+            method that plasmids are transferred
+            - simple: only considers the number of potential recipients and donors
+            - proportion: takes into account recipients and donors in total population and how other species might block contact
+        prop_strength : float, default=1
+            if using the 'proportion' plasmid_method, the strength of the effect of spatial inhibition, from 0-1
+        
+        Returns
+        --------
+        time : np.array
+            all the timesteps used in the simulation
+        donor : np.array
+            the change in donor population density at each timestep (gain or loss in the population)
+        recipient : np.array
+            the change in the recipient population density at each timestep (gain or loss in the population)
+        trans_clonal : np.array
+            the change in transconjugant population density from just 'clonal' growth at each timestep (gain or loss in the population)
+        plasmid : np.array
+            the population density of transconjugants who recieved the plasmid at each time step"""
         time = self.results.t
         # Donor
         donor = np.diff(self.results.y[0,:].T)
@@ -399,17 +541,27 @@ class ode_lotka:
 
     def plot_growth_rates(self, conjugation_rate, plasmid_method='simple', prop_strength=1, show_transconjugant_growth=True, compare_dr=False, figsize=(7,6), save_fig=False, filename='growth_rates', tp_colours=['k', 'lime', 'magenta', 'b']):
         """Plots the graph of the transconjugant growth rate, vs how many are actually formed via conjugation (actual plasmid transfer term). May also include donor and recipient species.
-        Parameters:
-            conjugation_rate (float): plasmid conjugation rate used for recalculating just plasmid transfer
-            plasmid_method (str): method that plasmids are transfered
-                - simple: only considers the number of potential recipients and donors
-                - proportion: takes into account recipients and donors in total population and how other species might block contact
-            prop_strength (float): if using the 'proportion' plasmid_method, the strength of the effect of the proportion, from 0-1
-            show_transconjugant_growth (boolean): whether to include the overal transconjugant population
-            compare_dr (boolean): whether graph shows donor/recipient growth rates, or just transconjugant clonal growth and plasmid transfer rate
-            save_fig (boolean): defines if the figure should be saved for later
-            filename (str): the filename if the figure is saved
-            tp_colours (list): the colours to use for the transconjugants and the plasmid transfer"""
+        
+        Parameters
+        -----------
+        conjugation_rate : float
+            plasmid conjugation rate for determining just plasmid transfer
+        plasmid_method : string, default='simple'
+            method that plasmids are transferred
+            - simple: only considers the number of potential recipients and donors
+            - proportion: takes into account recipients and donors in total population and how other species might block contact
+        prop_strength : float, default=1
+            if using the 'proportion' plasmid_method, the strength of the effect of spatial inhibition, from 0-1
+        show_transconjugant_growth : boolean, default=True
+            whether to include the overal transconjugant population
+        compare_dr : boolean, default=False
+            whether the graph shows donor/recipient growth rates, or just transconjugant clonal growth and plasmid transfer rate
+        save_fig : boolean, default=False
+            determines if the figure should be saved to files
+        filename : string, default='equilibrium'
+            the filename if the figure is saved
+        tp_colours : list
+            the colours to use when plotting the transconjugants and the plasmid transfer"""
         time, donor, recipient, trans_clonal, plasmid = self.determine_species_growth_rates(conjugation_rate, plasmid_method, prop_strength)
         fig, ax = plt.subplots(figsize=figsize)
         if compare_dr:  
