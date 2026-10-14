@@ -83,7 +83,7 @@ class ode_lotka:
             alpha[1,2] = -self_inhibition  # recipient interaction with transconjugants is the same as self-inhibition
             alpha[2] = alpha[1]  # transconjugants = recipients
             # Finding r from self-inhibition
-            steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
+            steady_state = self.get_growth_rate(alpha, intrinsic_growth)
             # Calculate stability
             stability = self.get_stability(alpha, steady_state)
             if stability < 0:  # if the values of eigenvalues less than 0 it is stable
@@ -127,7 +127,7 @@ class ode_lotka:
         alpha[1,2] = -self_inhibition  # recipient interaction with transconjugants is the same as self-inhibition
         alpha[2] = alpha[1]  # transconjugants = recipientsn
         # Finding r from self-inhibition
-        steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
+        steady_state = self.get_growth_rate(alpha, intrinsic_growth)
         # Calculate stability of inputted matrix
         stability = self.get_stability(alpha, steady_state)
         if stability < 0:  # if the values of eigenvalues less than 0 it is stable
@@ -170,8 +170,7 @@ class ode_lotka:
         Parameters
         ----------
         filepath : str
-            the filepath the interaction matrix and r should be saved to
-            they will have the suffix *_alpha.csv or *_r.csv respectively"""
+            the filepath the interaction matrix and r should be saved to - they will have the suffix *_alpha.csv or *_r.csv respectively"""
         np.savetxt(f'{filepath}_alpha.csv', self.alpha, delimiter=',')
         np.savetxt(f'{filepath}_r.csv', self.r, delimiter=',')
 

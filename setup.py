@@ -5,14 +5,14 @@ def get_readme():
     with open('README.md') as f:
         return f.read()
 
-setup(name='bacterial-community-conjugation-ODE',
+setup(name='ODEconjugation',
       version='0.1',
       description='A package to model the spread of a plasmid by conjugation within a bacterial community perturbed by antibiotics',
       long_description=get_readme(),
       author='AnMei Daniels',
       url='https://github.com/amybda/bacterial-community-conjugation-ODE',
       # Packages to include
-      packages=find_packages(include=('ODE-model')),
+      packages=find_packages(include=('ODEconjugation', 'ODEconjugation.*')),
       include_package_data=True,
       install_requires=['numpy',
                         'scipy',

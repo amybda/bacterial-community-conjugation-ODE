@@ -1,7 +1,7 @@
-ODEmodel
+ODEconjugation
 ================
 
-.. currentmodule:: ODEmodel
+.. currentmodule:: ODEconjugation
 
 This file contains all the code to run the module, outlined in:
 
