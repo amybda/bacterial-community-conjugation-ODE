@@ -125,7 +125,7 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.nav_panel("Modifying Species"):
                 ui.markdown("""
                 ## **Determining Species Number**
-                The model is initialised for a run using `ode_lotka(n_species)`.The parameter `n_species` is used to determine the number of species in the community, excluding the donor, recipient and transconjugants. Therefore, a value of `n_species = 1` would have 4 species total. The number of species determines how many linked ODE equations need to be solved, with the number of entries in $x(t)$ and the size of the interaction matrix.<br><br>
+                The model is initialised for a run using `ode_lotka(n_species)`. The parameter `n_species` is used to determine the number of species in the community, excluding the donor, recipient and transconjugants. Therefore, a value of `n_species = 1` would have 4 species total. The number of species determines how many linked ODE equations need to be solved, with the number of entries in $x(t)$ and the size of the interaction matrix.<br><br>
                 In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effects of receiving resistance genes.<br><br>
                 The starting species density `x0` is a parameter entered as an array with `3 + n_species` entries. Species (including donor and recipient when 'spiked in') are likely to not remain at the starting density, as the system will always try to tend to equilibrium based on the ODEs. This may not reflect real experimental behaviour, where species remain in stationary phase at the OD they are introduced. In this model, you can run an equilibrium step - to let the community find equilibrium without any drug perturbations or pathogens, or start the 'main simulation' right away without finding equilibrium.
                 <hr>""")
@@ -661,7 +661,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     with ui.accordion_panel('Intrinsic Growth Rate'):
                         ui.markdown("""
                         Once the interaction matrix and species self-interaction is defined, we can then identify the species growth rate, $r_i$:
-                        - we assume the community has a linearly asymptotically stable equilibrium at $x_i \\approx \\text{instrinsic growth} \\in i$, where the default value `instrinsic_growth = 1` $\\pm$ some random noise
+                        - we assume the community has a linearly asymptotically stable equilibrium at $x_i \\approx \\text{intrinsic growth} \\in i$, where the default value `instrinsic_growth = 1` $\\pm$ some random noise
                         - intrinsic growth can also be an array provided with `3 + n_species`, so that each community species has their own growth rate
                         - the array `steady_state` is the length of the `3 + n_species` is made, with each of the values being around `intrinsic_growth`, with some random noise around the value
                         - note that even if different intrinsic growth rates are provided for donor/recipient/transconjugant species, as they have the same interaction matrix parameters, they will have the same calculated $r$ values
@@ -769,7 +769,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 #### <b>Introducing Drug Perturbation</b>
                 The overall `drug_effect` is determined by the drug strength $p$ at time $t$, as well as the `susceptibility` $\\epsilon$ of each species to the drug. The `drug_effect` term calculated is subtracted from each species' population density to model the reduced population growth of a species perturbed by a drug.<br><br>
                 The effect of drug perturbation on the model is time-dependent, where the drug is introduced to the system at `t_drug` and removed at `drug_recovery`. The strength of the drug $p$ is then set as an array, `drug_time`. The array is set to `0` at `t < t_drug & t > t_drug_recovery` and set to `drug_level` at `t_drug < t < t_drug_recovery`.<br><br>
-                At each timepoint `t`, `drug_time` is then indexed and multipled by the `susceptibility` for each species.""")
+                At each timepoint `t`, `drug_time` is then indexed and multiplied by the `susceptibility` for each species.""")
                 with ui.layout_columns(col_widths=[5, 7]):
                     with ui.layout_columns(col_widths=[12, 12]):
                         with ui.card():
@@ -965,14 +965,14 @@ with ui.navset_card_pill(id="main_tabs"):
 
                     # Susceptibility
                     with ui.accordion_panel('Susceptibility'):
-                        ui.markdown("""Each species then can have varying susceptibilities $\\epsilon$ to the drug provided, including the donor, recipient and transconjugant species. In the below example, the transconjugant species has the same susceptibility as recipient, unless the donor has a low susceptiblity, in which case it takes the 'donated' antibiotic resistance gene which confers greater resistance.""")
+                        ui.markdown("""Each species then can have varying susceptibilities $\\epsilon$ to the drug provided, including the donor, recipient and transconjugant species. In the below example, the transconjugant species has the same susceptibility as recipient, unless the donor has a low susceptibility, in which case it takes the 'donated' antibiotic resistance gene which confers greater resistance.""")
                         @render_plotly(width='100%')
                         def susceptibility_trans():
                             graph_points = np.linspace(0, 1, 21)
                             u, v = np.meshgrid(graph_points, graph_points)
                             z0 = 0*np.ones(u.shape)
                             z1 = 1*np.ones(u.shape)
-                            trans_drug_strength = np.load('./Data/change_susceptibility.npy').mean(axis=3)
+                            trans_drug_strength = np.load(f'{data_dir}/change_susceptibility.npy').mean(axis=3)
                             # Render fixed community numbers
                             fig = go.Figure(go.Surface(x=u, y=v, z=z1, coloraxis="coloraxis", surfacecolor=np.rot90(trans_drug_strength[-1, :, ::-1]),
                                                        customdata=np.stack((u, v, trans_drug_strength[-1, :, :]), axis=2),
@@ -1096,7 +1096,7 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.nav_panel("Modelling Conjugation"):
                 ui.markdown("""
                 #### <b>Modelling Conjugation</b>
-                The donor and recipient are innoculated at `t_dr`, which can be any time later than `t = 0`. Both when running with an equilibrium step and when running without one and `t < t_dr`; the donor, recipient and transconjugant values are set to 0. During this time, the `plasmid_transer` term $\\gamma=0$ also ensures that no transconjugation occurs. Afterwards, when `t > t_dr`, the population density for the community calculated by the ODE solver is carried forward, but the donor and recipient values are taken from the `x0` value inputted by the user.""")
+                The donor and recipient are inoculated at `t_dr`, which can be any time later than `t = 0`. Both when running with an equilibrium step and when running without one and `t < t_dr`; the donor, recipient and transconjugant values are set to 0. During this time, the `plasmid_transfer` term $\\gamma=0$ also ensures that no conjugation occurs. Afterwards, when `t > t_dr`, the population density for the community calculated by the ODE solver is carried forward, but the donor and recipient values are taken from the `x0` value inputted by the user.""")
                 with ui.layout_columns(col_widths=[5, 7]):
                     with ui.layout_columns(col_widths=[12, 12]):
                         with ui.card():
@@ -1206,7 +1206,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 The second method `proportion` also takes into account any other species in the community, and any spatial inhibition they may provide to conjugation. Even if species don't have any interaction via the interaction matrix, there should be an effect on conjugation rate due to the competition for space, and the limited ability for the donor to physically contact the recipient. The method takes `conjugation_rate` $\\Gamma$ and determines the `plasmid_transfer` rate:
                 $$\\gamma=x_\\text{recipients}[\\Gamma(x_\\text{donors}+x_\\text{transconjugants})]\\times\\rho\\times\\frac{1}{\\lambda}$$
                 where $\\rho = \\text{prop}\\_\\text{donor + transconjugant} \\times \\text{prop}\\_\\text{recipient}$<br><br>
-                This method takes the simple `plasmid_transfer` rate and multiplies it by the proportion of cells in the population that can donate the plasmid and the proportion of cells in the population that can recieve the plasmid. Therefore, the more cells there are the community, the lower the proportion of donors and recipients, and the less likely there are to come into contact with each other to allow conjugation to occur, even if there are high numbers of donor and recipient cells. This method is modulated by `prop_strength` $\\lambda\\in[0,1]$. The user entered value is then rescaled to the range $\\lambda\\in[\\rho,1]$ to prevent a divide by 0 error and take into account the strength of the effect.""")
+                This method takes the simple `plasmid_transfer` rate and multiplies it by the proportion of cells in the population that can donate the plasmid and the proportion of cells in the population that can receive the plasmid. Therefore, the more cells there are the community, the lower the proportion of donors and recipients, and the less likely there are to come into contact with each other to allow conjugation to occur, even if there are high numbers of donor and recipient cells. This method is modulated by `prop_strength` $\\lambda\\in[0,1]$. The user entered value is then rescaled to the range $\\lambda\\in[\\rho,1]$ to prevent a divide by 0 error and take into account the strength of the effect.""")
                 @render_plotly(width='100%')
                 def spatial_conj_trans():
                     x = np.logspace(-6, -1, 501, base=10)*5
@@ -1420,6 +1420,14 @@ with ui.navset_card_pill(id="main_tabs"):
         # Markdown
         ui.markdown("""
         ## **Running the Model**
+        Once the parameters of the model to set things up as described, and the interaction matrix and growth rates have been calculated, the system of ODEs can be solved. The `scipy` function `solve_ivp()` is used from `t_start < t < t_end` to solve the system of equations:
+        $$ \\begin{bmatrix} dDdt \\\\\ dRdt \\\\\ dTdt \\\\\ dC_1dt \\\\\ ... \\end{bmatrix} =
+        \\begin{bmatrix} dX_Ddt \\\\\ dX_Rdt \\\\\ dX_Tdt \\\\\ dX_{C_1}dt \\\\\ ... \\end{bmatrix} -
+        \\begin{bmatrix} \\epsilon_Dp(t) \\\\\ \\epsilon_Rp(t) \\\\\ \\epsilon_Tp(t) \\\\\ \\epsilon_{C_1}p(t) \\\\\ ... \\end{bmatrix} +
+        \\begin{bmatrix} 0 \\\\\ - \\gamma \\\\\ \\gamma \\\\\ 0 \\\\\ ... \\end{bmatrix}
+        $$
+        where $$dXdt = X \\left[ r + (\\mathbf{\\alpha} \\times \\mathbf{\\overrightarrow{X}}) \\right]$$
+        `solve_ivp` outputs the array of every timestep a calculation was done, as well as `(t_end + 1) x n_species` array with the population density for each species at each timepoint. This can be used for further analysis and graphing to view the outputs.<br><br>
         Here you can adjust any and all parameters to create a custom run of the model!<br><br>""")
 
         # Parameters

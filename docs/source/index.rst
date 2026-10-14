@@ -24,7 +24,7 @@ All the code for this model is contained in the folder ``ODEconjugation``. . Wit
 
 Run Online in Browser
 ^^^^^^^^^^^^^^^^^^^^^^^
-The simplest method to interact with the code is to run it in our webapp at our `GitHub pages <https://amybda.github.io/bacterial-community-conjugation-ODE/>`_. The app contains full details on the mathematical background, a walkthrough of each of the parameters and how it affects the model outputs, as well as an option to run a simulation with fully customised parameters.
+The simplest method to interact with the code is to run it in our webapp at our `GitHub pages <https://amybda.github.io/bacterial-community-conjugation-ODE/>`_ The app contains full details on the mathematical background, a walkthrough of each of the parameters and how it affects the model outputs, as well as an option to run a simulation with fully customised parameters.
 
 Run Local App on Your Computer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
