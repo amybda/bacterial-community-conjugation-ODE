@@ -1431,7 +1431,79 @@ with ui.navset_card_pill(id="main_tabs"):
         Here you can adjust any and all parameters to create a custom run of the model!<br><br>""")
 
         # Parameters
-        with ui.layout_columns(col_widths=(4,4,4, 4,4,4, 12, 12, 6,6, 12), fill=False):
+        with ui.layout_columns(col_widths=(12, 4,4,4, 4,4,4, 12, 6,6, 12), fill=False):
+
+            # General Parameters
+            with ui.card(fill=False):
+                with ui.card_header():
+                    ui.markdown(""" General Parameters""")
+                with ui.layout_columns(col_widths=(4,4,4, 6,6)):
+                    ui.input_checkbox(id='run_equilibrium', label='Run Equilibrium Step?', value=True, width='100%')
+                    ui.input_numeric(id='tend', label='Simulation End Time', value=2000, min=0, step=1, width='100%')
+                    ui.input_numeric(id='n_species', label='Number of Species in the Community:', value=0, min=0, max=26, step=1,width='100%')
+                    # Set to simple
+                    ui.input_action_button(id='set_to_simple', label='Set parameters to a simple one-species community', width='100%')
+                    @reactive.effect
+                    @reactive.event(input.set_to_simple)
+                    def _():
+                        # Interaction matrix
+                        ui.update_checkbox(id='dr_equal', value=True)
+                        ui.update_slider(id='connectivity', value=1)
+                        ui.update_slider(id='Pm', value=0)
+                        ui.update_slider(id='s_i', value=0.1)
+                        ui.update_slider(id='sigma', value=0.2)
+                        # Drugs
+                        ui.update_slider(id='tdrug', value=0)
+                        ui.update_slider(id='tdrug_recovery', value=2000)
+                        ui.update_slider(id='drug_strength', value=0.5)
+                        # Conjugation
+                        ui.update_slider(id='tdr', value=0)
+                        ui.update_numeric(id='simple_conj', value=5e-4)
+                        ui.update_slider(id='spatial_conj', value=0)
+                        # Donor/Recip/Trans
+                        for sp, x in zip(['donor', 'recip', 'trans'], [0.5,0.5,0]):
+                            exec(f"ui.update_numeric(id='x0_{sp}', value={x})")  # noqa: S102
+                            exec(f"ui.update_numeric(id='growth_{sp}', value=1)")  # noqa: S102
+                            exec(f"ui.update_slider(id='sus_{sp}',  value=0.05)")  # noqa: S102
+                        # Other parameters
+                        ui.update_checkbox(id='run_equilibrium', value=True)
+                        ui.update_numeric(id='tend', value=2000)
+                        ui.update_numeric(id='n_species', value=1)
+                        ui.update_numeric(id='x0_spec1', value=0.5)
+                        ui.update_numeric(id='growth_spec1', value=1)
+                        ui.update_slider(id='sus_spec1',  value=0.5)
+                    ui.input_action_button(id='set_to_hungate', label='Set parameters to recreate in vitro experiments with a simple oligo-mouse-microbiota-19 community', width='100%')
+                    @reactive.effect
+                    @reactive.event(input.set_to_hungate)
+                    def _():
+                        # Interaction matrix
+                        ui.update_checkbox(id='dr_equal', value=True)
+                        ui.update_slider(id='connectivity', value=0.9)
+                        ui.update_slider(id='Pm', value=0.1)
+                        ui.update_slider(id='s_i', value=0.1)
+                        ui.update_slider(id='sigma', value=0.04)
+                        # Drugs
+                        ui.update_slider(id='tdrug', value=0)
+                        ui.update_slider(id='tdrug_recovery', value= int(500 + (5/24*500)))
+                        ui.update_slider(id='drug_strength', value=0.25)
+                        # Conjugation
+                        ui.update_slider(id='tdr', value=500)
+                        ui.update_numeric(id='simple_conj', value=5e-3)
+                        ui.update_slider(id='spatial_conj', value=0.2)
+                        # Donor/Recip/Trans
+                        for sp, x, s in zip(['donor', 'recip', 'trans'], [0.5,0.5,0], [0.05, 0.08, 0.05]):
+                            exec(f"ui.update_numeric(id='x0_{sp}', value={x})")  # noqa: S102
+                            exec(f"ui.update_numeric(id='growth_{sp}', value=1)")  # noqa: S102
+                            exec(f"ui.update_slider(id='sus_{sp}',  value={s})")  # noqa: S102
+                        # Other parameters
+                        ui.update_checkbox(id='run_equilibrium', value=False)
+                        ui.update_numeric(id='tend', value=2000)
+                        ui.update_numeric(id='n_species', value=19)
+                        for i in range(1,20):
+                            exec(f"ui.update_numeric(id='x0_spec{i}', value=(1 + 0.5 * rd.random()))")  # noqa: S102
+                            exec(f"ui.update_numeric(id='growth_spec{i}', value=1)")  # noqa: S102
+                            exec(f"ui.update_slider(id='sus_spec{i}',  value=(0.5 + 0.2 * rd.random()))")  # noqa: S102
+
             # Interaction Matrix
             with ui.card(fill=False):
                 with ui.card_header():
@@ -1581,76 +1653,6 @@ with ui.navset_card_pill(id="main_tabs"):
                     ui.input_numeric(id='x0_trans', label='Starting Density', value=0, min=0.01, step=0.01, width='100%')
                     ui.input_numeric(id='growth_trans', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
                     ui.input_slider(id='sus_trans', label='Susceptibility', value=0.05, min=0, max=1, step=0.01, width='100%')
-            # General Parameters
-            with ui.card(fill=False):
-                with ui.card_header():
-                    ui.markdown(""" General Parameters""")
-                with ui.layout_columns(col_widths=(4,4,4, 6,6)):
-                    ui.input_checkbox(id='run_equilibrium', label='Run Equilibrium Step?', value=True, width='100%')
-                    ui.input_numeric(id='tend', label='Simulation End Time', value=2000, min=0, step=1, width='100%')
-                    ui.input_numeric(id='n_species', label='Number of Species in the Community:', value=0, min=0, max=26, step=1,width='100%')
-                    # Set to simple
-                    ui.input_action_button(id='set_to_simple', label='Set parameters to a simple one-species community', width='100%')
-                    @reactive.effect
-                    @reactive.event(input.set_to_simple)
-                    def _():
-                        # Interaction matrix
-                        ui.update_checkbox(id='dr_equal', value=True)
-                        ui.update_slider(id='connectivity', value=1)
-                        ui.update_slider(id='Pm', value=0)
-                        ui.update_slider(id='s_i', value=0.1)
-                        ui.update_slider(id='sigma', value=0.2)
-                        # Drugs
-                        ui.update_slider(id='tdrug', value=0)
-                        ui.update_slider(id='tdrug_recovery', value=2000)
-                        ui.update_slider(id='drug_strength', value=0.5)
-                        # Conjugation
-                        ui.update_slider(id='tdr', value=0)
-                        ui.update_numeric(id='simple_conj', value=5e-4)
-                        ui.update_slider(id='spatial_conj', value=0)
-                        # Donor/Recip/Trans
-                        for sp, x in zip(['donor', 'recip', 'trans'], [0.5,0.5,0]):
-                            exec(f"ui.update_numeric(id='x0_{sp}', value={x})")  # noqa: S102
-                            exec(f"ui.update_numeric(id='growth_{sp}', value=1)")  # noqa: S102
-                            exec(f"ui.update_slider(id='sus_{sp}',  value=0.05)")  # noqa: S102
-                        # Other parameters
-                        ui.update_checkbox(id='run_equilibrium', value=True)
-                        ui.update_numeric(id='tend', value=2000)
-                        ui.update_numeric(id='n_species', value=1)
-                        ui.update_numeric(id='x0_spec1', value=0.5)
-                        ui.update_numeric(id='growth_spec1', value=1)
-                        ui.update_slider(id='sus_spec1',  value=0.5)
-                    ui.input_action_button(id='set_to_hungate', label='Set parameters to recreate in vitro experiments with a simple oligo-mouse-microbiota-19 community', width='100%')
-                    @reactive.effect
-                    @reactive.event(input.set_to_hungate)
-                    def _():
-                        # Interaction matrix
-                        ui.update_checkbox(id='dr_equal', value=True)
-                        ui.update_slider(id='connectivity', value=0.9)
-                        ui.update_slider(id='Pm', value=0.1)
-                        ui.update_slider(id='s_i', value=0.1)
-                        ui.update_slider(id='sigma', value=0.04)
-                        # Drugs
-                        ui.update_slider(id='tdrug', value=0)
-                        ui.update_slider(id='tdrug_recovery', value= int(500 + (5/24*500)))
-                        ui.update_slider(id='drug_strength', value=0.25)
-                        # Conjugation
-                        ui.update_slider(id='tdr', value=500)
-                        ui.update_numeric(id='simple_conj', value=5e-3)
-                        ui.update_slider(id='spatial_conj', value=0.2)
-                        # Donor/Recip/Trans
-                        for sp, x, s in zip(['donor', 'recip', 'trans'], [0.5,0.5,0], [0.05, 0.08, 0.05]):
-                            exec(f"ui.update_numeric(id='x0_{sp}', value={x})")  # noqa: S102
-                            exec(f"ui.update_numeric(id='growth_{sp}', value=1)")  # noqa: S102
-                            exec(f"ui.update_slider(id='sus_{sp}',  value={s})")  # noqa: S102
-                        # Other parameters
-                        ui.update_checkbox(id='run_equilibrium', value=False)
-                        ui.update_numeric(id='tend', value=2000)
-                        ui.update_numeric(id='n_species', value=19)
-                        for i in range(1,20):
-                            exec(f"ui.update_numeric(id='x0_spec{i}', value=(1 + 0.5 * rd.random()))")  # noqa: S102
-                            exec(f"ui.update_numeric(id='growth_spec{i}', value=1)")  # noqa: S102
-                            exec(f"ui.update_slider(id='sus_spec{i}',  value=(0.5 + 0.2 * rd.random()))")  # noqa: S102
 
             # All the species
             with ui.panel_conditional("input.n_species >= 1"):  # noqa: SIM117
