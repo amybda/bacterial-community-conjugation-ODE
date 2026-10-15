@@ -232,14 +232,14 @@ with ui.navset_card_pill(id="main_tabs"):
                                 "The interaction matrix used for this run is:"
                                 @render.data_frame
                                 def n_species_render_interaction_matrix():
-                                    return render.DataGrid(change_species_alpha_init, height='114px')
+                                    return render.DataGrid(change_species_alpha_init, height='114px', width='500px')
                                 @reactive.effect
                                 async def _():
                                     await n_species_render_interaction_matrix.update_data(change_species_alpha.get())
                                 "The growth rates used for this run is:"
                                 @render.data_frame
                                 def n_species_render_r():
-                                    return render.DataGrid(change_species_r_init)
+                                    return render.DataGrid(change_species_r_init, width='500px')
                                 @reactive.effect
                                 async def _():
                                     await n_species_render_r.update_data(change_species_r.get())
@@ -366,14 +366,14 @@ with ui.navset_card_pill(id="main_tabs"):
                                         "The interaction matrix used for this run is:"
                                         @render.data_frame
                                         def conn_render_interaction_matrix():
-                                            return render.DataGrid(change_conn_alpha_init, height='175px')
+                                            return render.DataGrid(change_conn_alpha_init, height='175px', width='500px')
                                         @reactive.effect
                                         async def _():
                                             await conn_render_interaction_matrix.update_data(change_conn_alpha.get())
                                         "The growth rates used are:"
                                         @render.data_frame
                                         def conn_render_r():
-                                            return render.DataGrid(change_conn_r_init)
+                                            return render.DataGrid(change_conn_r_init, width='500px')
                                         @reactive.effect
                                         async def _():
                                             await conn_render_r.update_data(change_conn_r.get())
@@ -1441,14 +1441,14 @@ with ui.navset_card_pill(id="main_tabs"):
                         "The interaction matrix used for this run is:"
                         @render.data_frame
                         def model_render_interaction_matrix():
-                            return render.DataGrid(model_alpha_init)
+                            return render.DataGrid(model_alpha_init, height='114px', width='650px')
                         @reactive.effect
                         async def _():
                             await model_render_interaction_matrix.update_data(model_alpha.get())
                         ui.markdown("<br>The growth rates used are:")
                         @render.data_frame
                         def model_render_r():
-                            return render.DataGrid(model_r_init)
+                            return render.DataGrid(model_r_init, width='650px')
                         @reactive.effect
                         async def _():
                             await model_render_r.update_data(model_r.get())
