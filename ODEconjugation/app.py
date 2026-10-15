@@ -575,6 +575,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                               xaxis={'tickfont': {'size': 18}},
                                               yaxis_title='Change from Initial Pop Density',
                                               yaxis={'tickfont': {'size':18}},
+                                              yaxis_range=[-1.5,6],
                                               legend={"title": 'Species', "groupclick": 'togglegroup'})
                             return fig
                         with ui.layout_columns(col_widths=[5, 7]):
