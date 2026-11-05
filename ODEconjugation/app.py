@@ -1898,9 +1898,12 @@ with ui.navset_card_pill(id="main_tabs"):
                                     t_dr=input.tdr(), t_drug=input.tdrug(), t_drug_recovery=input.tdrug_recovery())  # solve ode
                     model_results.set(model.results)
             # Plot
+            @render.text
+            def no_plot_possible():
+                if model_alpha_checks.get() == -1: return "The interaction matrix is hard to solve, so no simulation was not run. Please change the interaction matrix parameters. It is likely the sigma values are too big with too many species, try reducing species or decreasing sigma."
             @render_plotly(width='100%')
             def plot_model():
-                return plot_species_densities(model_results.get(), input.n_species())
+                if model_alpha_checks.get() != -1: return plot_species_densities(model_results.get(), input.n_species())
 
 
 
