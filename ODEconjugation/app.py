@@ -137,7 +137,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 * $m_0$ is the initial mortality of the species (if $m_0=0$ then intraspecific competition is 100% density-dependent), given in this model as $0.001$
                 * $d$ is the density-dependent factor, given as $0.01$
                 * note that $0 < m_0 + d \\geq 1$
-                * $\\delta$ is the strentgh of the effect of the population density, given as $1$
+                * $\\delta$ is the strentgh of the effect of the population density, given as $1$<br><br>
                 The crowding effect strongly inhibits the growth of species in the population if the population densities are too high, with a stronger and more consistent effect that simply using interaction strengths. The model allows you to turn this effect off, which you can do in the overall `Run Model` tab, but is generally kept on to more closely follow real-world effects.
                 <br><br>
                 Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as they other species supress the growth of the donor and recipient, as any conjugation that may occur.
@@ -166,65 +166,65 @@ with ui.navset_card_pill(id="main_tabs"):
                 ui.markdown("""#### Play Around with Community Composition and Starting Densities<br><br>""")
                 ui.input_numeric(id='params_n_species', label='Number of Species in the Community:', value=0, min=0, max=26, step=1)
                 with ui.layout_columns(col_widths=(4,4,4)):
-                    ui.input_numeric(id='params_x0_donor', label='Input Starting Density for Donor Species', value=5e-5, min=0, step=0.01, width='100%')
-                    ui.input_numeric(id='params_x0_recip', label='Input Starting Density for Recipient Species', value=5e-5, min=0, step=0.01, width='100%')
-                    ui.input_numeric(id='params_x0_trans', label='Input Starting Density for Transconjugant Species', value=0, min=0, step=0.01, width='100%')
+                    ui.input_numeric(id='params_x0_donor', label='Input Starting Density for Donor Species', value=0.00005, min=0, width='100%')
+                    ui.input_numeric(id='params_x0_recip', label='Input Starting Density for Recipient Species', value=0.00005, min=0, width='100%')
+                    ui.input_numeric(id='params_x0_trans', label='Input Starting Density for Transconjugant Species', value=0, min=0, width='100%')
                 # Edit starting densities for community members depending on their number
                 with ui.panel_conditional("input.params_n_species >= 1"):
                     ui.markdown("""##### Input Starting Density for Community""")
                 with ui.panel_conditional("input.params_n_species >= 1"):  # noqa: SIM117
                     with ui.layout_column_wrap(width='105px'):
-                        ui.input_numeric(id='params_x0_spec1', label='Species A', value=1, min=0.01, step=0.01)
+                        ui.input_numeric(id='params_x0_spec1', label='Species A', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 2"):
-                            ui.input_numeric(id='params_x0_spec2', label='Species B', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec2', label='Species B', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 3"):
-                            ui.input_numeric(id='params_x0_spec3', label='Species C', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec3', label='Species C', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 4"):
-                            ui.input_numeric(id='params_x0_spec4', label='Species D', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec4', label='Species D', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 5"):
-                            ui.input_numeric(id='params_x0_spec5', label='Species E', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec5', label='Species E', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 6"):
-                            ui.input_numeric(id='params_x0_spec6', label='Species F', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec6', label='Species F', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 7"):
-                            ui.input_numeric(id='params_x0_spec7', label='Species G', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec7', label='Species G', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 8"):
-                            ui.input_numeric(id='params_x0_spec8', label='Species H', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec8', label='Species H', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 9"):
-                            ui.input_numeric(id='params_x0_spec9', label='Species I', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec9', label='Species I', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 10"):
-                            ui.input_numeric(id='params_x0_spec10', label='Species J', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec10', label='Species J', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 11"):
-                            ui.input_numeric(id='params_x0_spec11', label='Species K', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec11', label='Species K', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 12"):
-                            ui.input_numeric(id='params_x0_spec12', label='Species L', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec12', label='Species L', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 13"):
-                            ui.input_numeric(id='params_x0_spec13', label='Species M', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec13', label='Species M', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 14"):
-                            ui.input_numeric(id='params_x0_spec14', label='Species N', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec14', label='Species N', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 15"):
-                            ui.input_numeric(id='params_x0_spec15', label='Species O', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec15', label='Species O', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 16"):
-                            ui.input_numeric(id='params_x0_spec16', label='Species P', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec16', label='Species P', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 17"):
-                            ui.input_numeric(id='params_x0_spec17', label='Species Q', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec17', label='Species Q', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 18"):
-                            ui.input_numeric(id='params_x0_spec18', label='Species R', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec18', label='Species R', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 19"):
-                            ui.input_numeric(id='params_x0_spec19', label='Species S', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec19', label='Species S', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 20"):
-                            ui.input_numeric(id='params_x0_spec20', label='Species T', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec20', label='Species T', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 21"):
-                            ui.input_numeric(id='params_x0_spec21', label='Species U', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec21', label='Species U', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 22"):
-                            ui.input_numeric(id='params_x0_spec22', label='Species V', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec22', label='Species V', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 23"):
-                            ui.input_numeric(id='params_x0_spec23', label='Species W', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec23', label='Species W', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 24"):
-                            ui.input_numeric(id='params_x0_spec24', label='Species X', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec24', label='Species X', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 25"):
-                            ui.input_numeric(id='params_x0_spec25', label='Species Y', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec25', label='Species Y', value=1, min=0)
                         with ui.panel_conditional("input.params_n_species >= 26"):
-                            ui.input_numeric(id='params_x0_spec26', label='Species Z', value=1, min=0.01, step=0.01)
+                            ui.input_numeric(id='params_x0_spec26', label='Species Z', value=1, min=0)
                 ui.input_action_button(id='species_new_alpha', label='Randomise a new interaction matrix')
                 ui.markdown("""<br><br>""")
                 with ui.layout_columns(col_widths=[8, 4]):
@@ -369,7 +369,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.markdown("""
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.04
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -389,7 +389,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                             await conn_render_r.update_data(change_conn_r.get())
                                         ui.markdown("""
                                         <br><u>Parameters for the model</u>
-                                        - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
+                                        - `x0` (initial donor/recipient densities): $5\\times 10^{-5} (no transconjugants to start)
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
                                 ui.markdown("""This example simulation lets you play around with different connectivity, $C$, proportions between species in the community. The more connected the community, the more of an impact the densities of each species will have on each others' growth and population density. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
@@ -398,14 +398,14 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Set up parameters
                             global change_conn, change_conn_alpha_init, change_conn_r_init
-                            params_x0 = [5e-5, 5e-5, 0, 1, 1, 1, 1]
-                            params_susceptibility = [0, 0, 0, 0, 0, 0, 0]
+                            params_x0 = [5e-5, 5e-5, 0] + [1] * 26
+                            params_susceptibility = np.zeros(29)
                             # Run model
-                            change_conn = ode_lotka(n_species=4)  # initialise model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
+                            change_conn = ode_lotka(n_species=26)  # initialise model
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
                             change_conn_alpha_init = change_conn_alpha.get()
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
                             change_conn_r_init = change_conn_r.get()
                             change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
@@ -414,18 +414,18 @@ with ui.navset_card_pill(id="main_tabs"):
                         @reactive.event(input.connectivity_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [5e-5, 5e-5, 0, 1, 1, 1, 1, 1]
-                            params_susceptibility = [0, 0, 0, 0, 0, 0, 0]
+                            params_x0 = [5e-5, 5e-5, 0] + [1] * 26
+                            params_susceptibility = np.zeros(29)
                             # Run model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
                             change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Plot
                         @render_plotly(width='100%')
                         def plot_change_conn():
-                            return plot_species_densities(change_conn_results.get(), 4)
+                            return plot_species_densities(change_conn_results.get(), 26)
 
                     # Self Inhibition and Interaction Strength
                     with ui.accordion_panel('Self Inhibition & Interaction Strength'):
