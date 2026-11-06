@@ -103,13 +103,14 @@ with ui.navset_card_pill(id="main_tabs"):
             * [The ecology of the microbiome: Networks, competition, and stability (2015)](https://www.science.org/doi/full/10.1126/science.aad2602#abstract)
             * [Horizontal gene transfer and ecological interactions jointly control microbiome stability (2022)](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001847#sec008)
             <br><br>
-            The equation used here to model growth is: $$\\frac{dx_i(t)}{dt} = x_i(t) \\left(r_i \\sum_j \\alpha_{ij}x_j(t) + \\epsilon_i p(t) \\right) + \\gamma$$ where:<br><br>
+            The equation used here to model growth is: $$\\frac{dx_i(t)}{dt} = x_i(t) \\left(r_i \\sum_j \\alpha_{ij}x_j(t) + \\epsilon_i p(t) - m_i \\right) + \\gamma$$ where:<br><br>
             * $\\frac{dx_i(t)}{dt}$ is the change in community density
             * $x(t)$ is a vector containing the densities of all the populations $1,...,n$ at time $t$
             * $r$ is a vector of the growth rates (or death rates when negative) measuring the growth/decline of population $i$ when growing alone at low density
             * $\\alpha$ is an $n \\times n$ matrix of interaction coefficients, with self-inhibition (or growth) vector $s_i(x)$ as the diagonal matrix
             * $\\epsilon$ is the susceptibility of a species to the perturbation (in this case the drug)
             * $p$ is the overall strength of the perturbation introduced
+            * $m_i$ is the crowding effect rate for species $i$
             * $\\gamma$ is the term considering plasmid transfer, and how that affects the population (ie. changing some cells from recipients to transconjugants)
             <br><hr>
             ### <u>This Programme</u>
@@ -128,6 +129,8 @@ with ui.navset_card_pill(id="main_tabs"):
                 The model is initialised for a run using `ode_lotka(n_species)`. The parameter `n_species` is used to determine the number of species in the community, excluding the donor, recipient and transconjugants. Therefore, a value of `n_species = 1` would have 4 species total. The number of species determines how many linked ODE equations need to be solved, with the number of entries in $x(t)$ and the size of the interaction matrix.<br><br>
                 In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effects of receiving resistance genes.<br><br>
                 The starting species density `x0` is a parameter entered as an array with `3 + n_species` entries. Species (including donor and recipient when 'spiked in') are likely to not remain at the starting density, as the system will always try to tend to equilibrium based on the ODEs. This may not reflect real experimental behaviour, where species remain in stationary phase at the OD they are introduced. In this model, you can run an equilibrium step - to let the community find equilibrium without any drug perturbations or pathogens, or start the 'main simulation' right away without finding equilibrium.
+                <br><br>
+                Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as they other species supress the growth of the donor and recipient, as any conjugation that may occur.
                 <hr>""")
                 @render_plotly(width='100%')
                 def nspecies_trans():
@@ -153,8 +156,8 @@ with ui.navset_card_pill(id="main_tabs"):
                 ui.markdown("""#### Play Around with Community Composition and Starting Densities<br><br>""")
                 ui.input_numeric(id='params_n_species', label='Number of Species in the Community:', value=0, min=0, max=26, step=1)
                 with ui.layout_columns(col_widths=(4,4,4)):
-                    ui.input_numeric(id='params_x0_donor', label='Input Starting Density for Donor Species', value=0.5, min=0.01, step=0.01, width='100%')
-                    ui.input_numeric(id='params_x0_recip', label='Input Starting Density for Recipient Species', value=0.5, min=0.01, step=0.01, width='100%')
+                    ui.input_numeric(id='params_x0_donor', label='Input Starting Density for Donor Species', value=5e-5, min=0, step=0.01, width='100%')
+                    ui.input_numeric(id='params_x0_recip', label='Input Starting Density for Recipient Species', value=5e-5, min=0, step=0.01, width='100%')
                     ui.input_numeric(id='params_x0_trans', label='Input Starting Density for Transconjugant Species', value=0, min=0, step=0.01, width='100%')
                 # Edit starting densities for community members depending on their number
                 with ui.panel_conditional("input.params_n_species >= 1"):
@@ -245,11 +248,8 @@ with ui.navset_card_pill(id="main_tabs"):
                                     await n_species_render_r.update_data(change_species_r.get())
                                 ui.markdown("""
                                 <br><u>Parameters for the model</u>
-                                - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
-                                - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.5
-                                - `drug_level` (magnitude of perturbation): 0.5""")
-                        ui.markdown("""This example simulation lets you play around with different numbers of 'commensal' species in the community, and the starting densities for each species. In this example, after the initial population densities are introduced, the simulation is allowed to find an equilibrium for the first 500 timesteps before introducing the donor and recipient species, as well as the drug which perturbs the community. Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
+                                - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
+                        ui.markdown("""This example simulation lets you play around with different numbers of 'commensal' species in the community, and the starting densities for each species. In this example, after the initial population densities are introduced, the simulation is allowed to find an equilibrium for the first 50 timesteps before introducing the donor and recipient species. Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                     # Transconjugant final numbers
                     with ui.value_box(showcase=icon('bacteria'), theme="purple"):
                         "Transconjugant Population Density"
@@ -266,7 +266,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     for i in range(1, input.params_n_species() + 1):
                         exec(f"params_x0.append(input.params_x0_spec{i}())")  # noqa: S102
                     # Determine susceptibility
-                    params_susceptibility = [0.05, 0.05, 0.05] + ([0.5] * input.params_n_species())
+                    params_susceptibility = np.zeros(input.params_n_species() + 3)
                     # Run model
                     change_species = ode_lotka(input.params_n_species())  # initialise model
                     change_species.randomise_interaction_matrix(connectivity=1, sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -275,7 +275,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)), 
                                                        columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_r_init = change_species_r.get()
-                    change_species.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=False, t_drug=500, t_dr=500)  # solve ode
+                    change_species.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
                     change_species_results.set(change_species.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
@@ -286,13 +286,13 @@ with ui.navset_card_pill(id="main_tabs"):
                     for i in range(1, input.params_n_species() + 1):
                         exec(f"params_x0.append(input.params_x0_spec{i}())")  # noqa: S102
                     # Determine susceptibility
-                    params_susceptibility = [0.05, 0.05, 0.05] + ([0.5] * input.params_n_species())
+                    params_susceptibility = np.zeros(input.params_n_species() + 3)
                     # Run model
                     change_species.randomise_interaction_matrix(connectivity=1, sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_species_alpha.set( pd.DataFrame(change_species.alpha, columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)),
                                                        columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
-                    change_species.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=False, t_drug=500, t_dr=500)  # solve ode
+                    change_species.solve_ode(t_start=0, t_end=150, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
                     change_species_results.set(change_species.results)
                 # Plot
                 @render_plotly(width='100%')
