@@ -94,10 +94,9 @@ class ode_lotka:
                 self.alpha = alpha  # assign alpha value
             else: checks += 1
             # Set up automatic break clause if it takes too long to find a good interaction matrix
-            if checks > 50600:
-                print('Interaction matrix parameters are hard to solve. Try again with different parameters.')
+            if checks > 60000:
                 self.good_alpha = -1
-                break
+                raise AttributeError('Interaction matrix parameters are hard to solve. Try again with different parameters.')
 
     def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
         """A function that allows custom entry of an interaction matrix, and self inhibition rates, and then will
@@ -323,8 +322,10 @@ class ode_lotka:
         prop_strength : float, default=1
             if using the 'proportion' plasmid_method, the strength of the effect of spatial inhibition, from 0-1"""
         plasmid_transfer = X[1] * (conjugation_rate*(X[0] + X[2]))  # calc n_recip * n_givers (donor + transconjugant)
-        prop_donor = (X[0] + X[2])/np.sum(X)  # taking into account proportion of donors
-        prop_recipient = X[1] / np.sum(X)  # and recipients
+        if np.sum(X) == 0: tot_density = 1e-10
+        else: tot_density = np.sum(X)
+        prop_donor = (X[0] + X[2])/tot_density  # taking into account proportion of donors
+        prop_recipient = X[1] / tot_density  # and recipients
         prop_strength = ((prop_strength - 0) / (1 - 0)) * \
                         (1 - (prop_donor * prop_recipient)) + (prop_donor * prop_recipient) # rescale 0->prop (div 0)
         return plasmid_transfer * prop_donor * prop_recipient * (1/prop_strength)  # likelihood of plasmid transfer

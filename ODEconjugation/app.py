@@ -130,6 +130,16 @@ with ui.navset_card_pill(id="main_tabs"):
                 In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effects of receiving resistance genes.<br><br>
                 The starting species density `x0` is a parameter entered as an array with `3 + n_species` entries. Species (including donor and recipient when 'spiked in') are likely to not remain at the starting density, as the system will always try to tend to equilibrium based on the ODEs. This may not reflect real experimental behaviour, where species remain in stationary phase at the OD they are introduced. In this model, you can run an equilibrium step - to let the community find equilibrium without any drug perturbations or pathogens, or start the 'main simulation' right away without finding equilibrium.
                 <br><br>
+                #### The Crowding Effect
+                This model also incorporates a term for the crowding effect, which incorporates competition for resources in a closed system, not just the direct interaction effects of species upon each other.
+                $$m_i = m_{0} + d x_i^\\delta, \\delta\\in(0,\\infty)$$
+                where
+                * $m_0$ is the initial mortality of the species (if $m_0=0$ then intraspecific competition is 100% density-dependent), given in this model as $0.001$
+                * $d$ is the density-dependent factor, given as $0.01$
+                * note that $0 < m_0 + d \\geq 1$
+                * $\\delta$ is the strentgh of the effect of the population density, given as $1$
+                The crowding effect strongly inhibits the growth of species in the population if the population densities are too high, with a stronger and more consistent effect that simply using interaction strengths. The model allows you to turn this effect off, which you can do in the overall `Run Model` tab, but is generally kept on to more closely follow real-world effects.
+                <br><br>
                 Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as they other species supress the growth of the donor and recipient, as any conjugation that may occur.
                 <hr>""")
                 @render_plotly(width='100%')
@@ -275,7 +285,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)), 
                                                        columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_r_init = change_species_r.get()
-                    change_species.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
+                    change_species.solve_ode(t_start=0, t_end=150, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
                     change_species_results.set(change_species.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
@@ -359,7 +369,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.markdown("""
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.15
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.2
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -381,44 +391,41 @@ with ui.navset_card_pill(id="main_tabs"):
                                         <br><u>Parameters for the model</u>
                                         - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
                                         - `x0` (initial community densities): 1
-                                        - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
-                                        - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.5
-                                        - `drug_level` (magnitude of perturbation): 0.5""")
-                                ui.markdown("""This example simulation lets you play around with different connectivity, $C$, proportions between species in the community. The more connected the community, the more of an impact the densities of each species will have on each other's growth and population density. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
+                                        - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
+                                ui.markdown("""This example simulation lets you play around with different connectivity, $C$, proportions between species in the community. The more connected the community, the more of an impact the densities of each species will have on each others' growth and population density. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
                             # Set up parameters
                             global change_conn, change_conn_alpha_init, change_conn_r_init
-                            params_x0 = [0.5, 0.5, 0, 1, 1, 1, 1, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.5, 0.5, 0.5, 0.5, 0.5]
+                            params_x0 = [5e-5, 5e-5, 0, 1, 1, 1, 1]
+                            params_susceptibility = [0, 0, 0, 0, 0, 0, 0]
                             # Run model
-                            change_conn = ode_lotka(n_species=5)  # initialise model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
+                            change_conn = ode_lotka(n_species=4)  # initialise model
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
                             change_conn_alpha_init = change_conn_alpha.get()
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
                             change_conn_r_init = change_conn_r.get()
-                            change_conn.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True)  # solve ode
+                            change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
                         @reactive.event(input.connectivity_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [0.5, 0.5, 0, 1, 1, 1, 1, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.5, 0.5, 0.5, 0.5, 0.5]
+                            params_x0 = [5e-5, 5e-5, 0, 1, 1, 1, 1, 1]
+                            params_susceptibility = [0, 0, 0, 0, 0, 0, 0]
                             # Run model
                             change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D','species_E']) )
-                            change_conn.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True)  # solve ode
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A','species_B','species_C','species_D']) )
+                            change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Plot
                         @render_plotly(width='100%')
                         def plot_change_conn():
-                            return plot_species_densities(change_conn_results.get(), 5)
+                            return plot_species_densities(change_conn_results.get(), 4)
 
                     # Self Inhibition and Interaction Strength
                     with ui.accordion_panel('Self Inhibition & Interaction Strength'):
@@ -1527,10 +1534,10 @@ with ui.navset_card_pill(id="main_tabs"):
                             await model_render_r.update_data(model_r.get())
                         ui.markdown("""<br>""")
                         with ui.layout_columns(col_widths=(6,6)):
-                            @render.download(label="Download the interaction matrix file", filename='alpha.csv')
+                            @render.download_button(label="Download the interaction matrix file", filename='alpha.csv')
                             def alpha_files():
                                 yield pd.DataFrame(model.alpha).to_csv()
-                            @render.download(label="Download the growth rate file", filename='r.csv')
+                            @render.download_button(label="Download the growth rate file", filename='r.csv')
                             def r_files():
                                 yield pd.DataFrame(model.r).to_csv()
                 ui.input_checkbox(id='dr_equal', label='Donor and Recipient are Same Species?', value=True, width='100%')
@@ -1849,7 +1856,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 @render.ui
                 def n_trans_model():
                     return f"{model_results.get()['y'][2][-1]:.4f}"
-            @render.download(label="Download the population density results", filename='pop_density.csv')
+            @render.download_button(label="Download the population density results", filename='pop_density.csv')
             def results_files():
                 results = model_results.get().y.T
                 comm_species = results.shape[1] - 3

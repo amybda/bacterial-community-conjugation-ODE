@@ -14,8 +14,9 @@ All the code for this model is contained in the folder ``ODEconjugation``. Withi
 |-- data
 |-- figures
 |-- app.py
-|-- modelling-ODE.ipynb
-|-- ode-model.py
+|-- model-walkthrough.ipynb
+|-- modelling-exp.ipynb
+|-- ode_model.py
 ```
 
 ### Run Online in Browser
@@ -31,5 +32,6 @@ If you want to explore the code on your computer, with the same user-friendly GU
 If you want full freedom to run and explore the code contained in this repository, you can run the code locally on your computer.
 1. Download this repository to your computer
 2. Install the requirements in your Python environment of choice using `pip install ./` from within the repository folder
-3. A walkthrough of how the code works is located in the Jupyter Notebook `modelling-ODE.ipynb`, with details on the background and step-by-step explanations of all the parameters
-4. Otherwise, you can create your own Python script to run the code - documentation for all the code is located at [ReadtheDocs](https://bacterial-community-conjugation-ode.readthedocs.io/en/latest/)
+3. A walkthrough of how the code works is located in the Jupyter Notebook `model-walkthrough.ipynb`, with details on the background and step-by-step explanations of all the parameters
+4. Additionally, the model has been used to try to recreate some *in vitro* experiments, which is shown in `modelling-exp.ipynb`
+5. Otherwise, you can create your own Python script to run the code - documentation for all the code is located at [ReadtheDocs](https://bacterial-community-conjugation-ode.readthedocs.io/en/latest/)
