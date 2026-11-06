@@ -767,7 +767,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 with ui.layout_columns(col_widths=[5, 7]):
                     with ui.layout_columns(col_widths=[12, 12]):
                         with ui.card():
-                            ui.input_slider(id='params_tdr', label='Input Donor and Recipient Introduction Time', value=0, min=0, max=2000, step=1, width='100%')
+                            ui.input_slider(id='params_tdr', label='Input Donor and Recipient Introduction Time', value=0, min=0, max=100, step=1, width='100%')
                             ui.input_action_button(id='tdr_new_alpha', label='Randomise a new interaction matrix', width='100%')
                         # Transconjugant final numbers
                         with ui.value_box(showcase=icon('bacteria'), theme="purple"):
@@ -784,7 +784,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 ##### Parameters
                                 <u>Parameters for the interaction matrix</u>
                                 - `connectivity` (probability of interactions): 1
-                                - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                - `sigma` (interspecies interaction strength standard deviation): 0.6
                                 - `self_inhibition` (intra-specific interaction strength): 0.1
                                 - `P_m` (proportion of species reactions that are positive): 0
                                 - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -800,41 +800,38 @@ with ui.navset_card_pill(id="main_tabs"):
                                 async def _(): await tdr_render_r.update_data(change_tdr_r.get())
                                 ui.markdown("""
                                 <br><u>Parameters for the model</u>
-                                - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
+                                - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                 - `x0` (initial community densities): 1
-                                - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
-                                - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.5
-                                - `drug_level` (magnitude of perturbation): 0.5""")
-                        ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community. This allows you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 2000`).  If `t_drug_removal = 2000`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix generated for this run.""")
+                                - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
+                        ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community. This allows you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 100`).  If `t_drug_removal = 100`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix generated for this run.""")
                 # Run model
                 @reactive.effect
                 def _():
                     # Set up parameters
                     global change_tdr, change_tdr_alpha_init, change_tdr_r_init
-                    params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                    params_x0 = [5e-5, 5e-5, 0, 1]
+                    params_susceptibility = np.zeros(4)
                     # Run model
                     change_tdr = ode_lotka(n_species=1)  # initialise model
-                    change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdr_alpha.set( pd.DataFrame(change_tdr.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdr_alpha_init = change_tdr_alpha.get()
                     change_tdr_r.set( pd.DataFrame(change_tdr.r.reshape(1,len(change_tdr.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdr_r_init = change_tdr_r.get()
-                    change_tdr.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, t_dr=int(input.params_tdr()))  # solve ode
+                    change_tdr.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, t_dr=int(input.params_tdr()))  # solve ode
                     change_tdr_results.set(change_tdr.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
                 @reactive.event(input.tdr_new_alpha)
                 def _():
                     # Parameters
-                    params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                    params_x0 = [5e-5, 5e-5, 0, 1]
+                    params_susceptibility = np.zeros(4)
                     # Run model
-                    change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdr_alpha.set( pd.DataFrame(change_tdr.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdr_r.set( pd.DataFrame(change_tdr.r.reshape(1,len(change_tdr.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                    change_tdr.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, t_dr=int(input.params_tdr()))  # solve ode
+                    change_tdr.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, t_dr=int(input.params_tdr()))  # solve ode
                     change_tdr_results.set(change_tdr.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -842,7 +839,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     return plot_species_densities(change_tdr_results.get(), 1)
 
                 ui.markdown("""
-                To model conjugation, the system of equations uses $\\gamma$ for only the recipient and transconjugant species. This float value `plasmid_transfer` is removed from the recipient population density, and is added to the transconjugant population density values. The final number in the transconjugant population is then used to measure the conjugation that has occurred. There are then two methods that can be used to determine plasmid transfer.<br><br>
+                To model conjugation, the system of equations includes a $\\gamma$ term for only the recipient and transconjugant species. This float value `plasmid_transfer` is removed from the recipient population density, and is added to the transconjugant population density values. The final number in the transconjugant population is then used to measure the conjugation that has occurred. There are then two methods that can be used to determine plasmid transfer.<br><br>
                 #### Simple Conjugation
                 The `simple` method takes `conjugation_rate` $\\Gamma$ and determines the plasmid_transfer rate: 
                 $$\\gamma=x_\\text{recipients}[\\Gamma(x_\\text{donors}+x_\\text{transconjugants})]$$
@@ -873,7 +870,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 The second method `proportion` also takes into account any other species in the community, and any spatial inhibition they may provide to conjugation. Even if species don't have any interaction via the interaction matrix, there should be an effect on conjugation rate due to the competition for space, and the limited ability for the donor to physically contact the recipient. The method takes `conjugation_rate` $\\Gamma$ and determines the `plasmid_transfer` rate:
                 $$\\gamma=x_\\text{recipients}[\\Gamma(x_\\text{donors}+x_\\text{transconjugants})]\\times\\rho\\times\\frac{1}{\\lambda}$$
                 where $\\rho = \\text{prop}\\_\\text{donor + transconjugant} \\times \\text{prop}\\_\\text{recipient}$<br><br>
-                This method takes the simple `plasmid_transfer` rate and multiplies it by the proportion of cells in the population that can donate the plasmid and the proportion of cells in the population that can receive the plasmid. Therefore, the more cells there are the community, the lower the proportion of donors and recipients, and the less likely there are to come into contact with each other to allow conjugation to occur, even if there are high numbers of donor and recipient cells. This method is modulated by `prop_strength` $\\lambda\\in[0,1]$. The user entered value is then rescaled to the range $\\lambda\\in[\\rho,1]$ to prevent a divide by 0 error and take into account the strength of the effect.""")
+                This method takes the simple `plasmid_transfer` rate and multiplies it by the proportion of cells in the population that can donate the plasmid and the proportion of cells in the population that can receive the plasmid. Therefore, the more cells there are the community, the lower the proportion of donors and recipients, and the less likely there are to come into contact with each other to allow conjugation to occur, even if there are high numbers of donor and recipient cells. This is similar to the crowding effect, this time implemented to influence plasmid transfer. This method is modulated by `prop_strength` $\\lambda\\in[0,1]$. The user entered value is then rescaled to the range $\\lambda\\in[\\rho,1]$ to prevent a divide by 0 error and take into account the strength of the effect.""")
                 @render_plotly(width='100%')
                 def spatial_conj_trans():
                     x = np.logspace(-6, -1, 501, base=10)*5
@@ -919,8 +916,8 @@ with ui.navset_card_pill(id="main_tabs"):
                         with ui.layout_columns(col_widths=[6, 6]):
                             with ui.layout_columns(col_widths=[12]):
                                 with ui.card():
-                                    ui.input_slider(id='params_compare_sigma', label='Input Strength of Interaction', value=0.2, min=0.001, max=1.1, step=0.001, width='100%')
-                                    ui.input_slider(id='params_compare_spatial', label='Input Strength of Spatial Inhibition', value=0, min=0, max=1, step=0.01, width='100%')
+                                    ui.input_slider(id='params_compare_sigma', label='Input Strength of Interaction', value=0.6, min=0.001, max=1.1, step=0.001, width='100%')
+                                    ui.input_slider(id='params_compare_spatial', label='Input Strength of Spatial Inhibition', value=0.1, min=0, max=1, step=0.01, width='100%')
                                     ui.input_action_button(id='compare_conj_new_alpha', label='Randomise a new interaction matrix', width='100%')
                                 # Transconjugant final numbers
                                 with ui.value_box(showcase=icon('bacteria'), theme="purple"):
@@ -956,20 +953,17 @@ with ui.navset_card_pill(id="main_tabs"):
                                             await compare_conj_render_r.update_data(change_compare_conj_r.get())
                                         ui.markdown("""
                                         <br><u>Parameters for the model</u>
-                                        - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
+                                        - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                         - `x0` (initial community densities): 1
-                                        - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
-                                        - `drug_strength`: 0.5
-                                        - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.5""")
+                                        - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
                                 ui.markdown("""This example simulation lets you play around with the parameters that inhibit conjugation, to identify the contributions of competitive interactions (values determined by $\\sigma$) vs spatial inhibition (given by $\\rho$) and the number of transconjugants formed. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
                             # Set up parameters
                             global change_compare_conj, change_compare_conj_alpha_init, change_compare_conj_r_init
-                            params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                            params_x0 = [5e-5, 5e-5, 0, 1]
+                            params_susceptibility = np.zeros(4)
                             # Run model
                             change_compare_conj = ode_lotka(n_species=1)  # initialise model
                             change_compare_conj.randomise_interaction_matrix(connectivity=1, sigma=input.params_compare_sigma(), P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
@@ -977,20 +971,20 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_compare_conj_alpha_init = change_compare_conj_alpha.get()
                             change_compare_conj_r.set( pd.DataFrame(change_compare_conj.r.reshape(1,len(change_compare_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_compare_conj_r_init = change_compare_conj_r.get()
-                            change_compare_conj.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, plasmid_method='proportion', prop_strength=input.params_compare_spatial())  # solve ode
+                            change_compare_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_compare_spatial())  # solve ode
                             change_compare_conj_results.set(change_compare_conj.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
                         @reactive.event(input.compare_conj_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                            params_x0 = [5e-5, 5e-5, 0, 1]
+                            params_susceptibility = np.zeros(4)
                             # Run model
                             change_compare_conj.randomise_interaction_matrix(connectivity=1, sigma=input.params_compare_sigma(), P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_compare_conj_alpha.set( pd.DataFrame(change_compare_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_compare_conj_r.set( pd.DataFrame(change_compare_conj.r.reshape(1,len(change_compare_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_compare_conj.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, plasmid_method='proportion', prop_strength=input.params_compare_spatial())  # solve ode
+                            change_compare_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_compare_spatial())  # solve ode
                             change_compare_conj_results.set(change_compare_conj.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -1020,7 +1014,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 ##### Parameters
                                 <u>Parameters for the interaction matrix</u>
                                 - `connectivity` (probability of interactions): 1
-                                - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                - `sigma` (interspecies interaction strength standard deviation): 0.6
                                 - `P_m` (proportion of species reactions that are positive): 0
                                 - `self_inhibition` (intra-specific interaction strength): 0.1
                                 - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -1040,40 +1034,37 @@ with ui.navset_card_pill(id="main_tabs"):
                                     await conj_render_r.update_data(change_conj_r.get())
                                 ui.markdown("""
                                 <br><u>Parameters for the model</u>
-                                - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
-                                - `x0` (initial community densities): 1
-                                - `drug_strength`: 0.5
-                                - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.5""")
+                                - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
+                                - `x0` (initial community densities): 1""")
                         ui.markdown("""This example simulation lets you play around with different conjugation rates, $\\Gamma$, which is measured on a log scale. It also lets you adjust the strength of spatial inhibition, $\\rho$ on conjugation for the `proportion` method, where 0 means no spatial inhibition (only using the `simple` method). In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                 # Run model
                 @reactive.effect
                 def _():
                     # Set up parameters
                     global change_conj, change_conj_alpha_init, change_conj_r_init
-                    params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                    params_x0 = [5e-5, 5e-5, 0, 1]
+                    params_susceptibility = np.zeros(4)
                     # Run model
                     change_conj = ode_lotka(n_species=1)  # initialise model
-                    change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_conj_alpha.set( pd.DataFrame(change_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_conj_alpha_init = change_conj_alpha.get()
                     change_conj_r.set( pd.DataFrame(change_conj.r.reshape(1,len(change_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_conj_r_init = change_conj_r.get()
-                    change_conj.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, plasmid_method='proportion', prop_strength=input.params_spatial_conj())  # solve ode
+                    change_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_spatial_conj())  # solve ode
                     change_conj_results.set(change_conj.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
                 @reactive.event(input.conj_new_alpha)
                 def _():
                     # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                    params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                    params_x0 = [5e-5, 5e-5, 0, 1]
+                    params_susceptibility = np.zeros(4)
                     # Run model
-                    change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_conj_alpha.set( pd.DataFrame(change_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_conj_r.set( pd.DataFrame(change_conj.r.reshape(1,len(change_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                    change_conj.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0.1, equilibrium=True, plasmid_method='proportion', prop_strength=input.params_spatial_conj())  # solve ode
+                    change_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_spatial_conj())  # solve ode
                     change_conj_results.set(change_conj.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -1087,6 +1078,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 # Changing introduction and removal
                 ui.markdown("""
                 #### <b>Introducing Drug Perturbation</b>
+                Now that a working model, that can incorporate plasmid transfer, has been created - we can introduce drug perturbation.<br><br>
                 The overall `drug_effect` is determined by the drug strength $p$ at time $t$, as well as the `susceptibility` $\\epsilon$ of each species to the drug. The `drug_effect` term calculated is subtracted from each species' population density to model the reduced population growth of a species perturbed by a drug.<br><br>
                 The effect of drug perturbation on the model is time-dependent, where the drug is introduced to the system at `t_drug` and removed at `drug_recovery`. The strength of the drug $p$ is then set as an array, `drug_time`. The array is set to `0` at `t < t_drug & t > t_drug_recovery` and set to `drug_level` at `t_drug < t < t_drug_recovery`.<br><br>
                 At each timepoint `t`, `drug_time` is then indexed and multiplied by the `susceptibility` for each species.""")
@@ -1116,7 +1108,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 ##### Parameters
                                 <u>Parameters for the interaction matrix</u>
                                 - `connectivity` (probability of interactions): 1
-                                - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                - `sigma` (interspecies interaction strength standard deviation): 0.6
                                 - `self_inhibition` (intra-specific interaction strength): 0.1
                                 - `P_m` (proportion of species reactions that are positive): 0
                                 - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -1132,45 +1124,45 @@ with ui.navset_card_pill(id="main_tabs"):
                                 async def _(): await tdrug_render_r.update_data(change_tdrug_r.get())
                                 ui.markdown("""
                                 <br><u>Parameters for the model</u>
-                                - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
+                                - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                 - `x0` (initial community densities): 1
                                 - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                 - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                - `susceptibility` (community): 0.5
-                                - `drug_level` (magnitude of perturbation): 0.5""")
-                        ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community, allowing you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 2000`).  If `t_drug_removal = 2000`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run.""")
+                                - `susceptibility` (community): 1
+                                - `drug_level` (magnitude of perturbation): 0.7""")
+                        ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community, allowing you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 100`).  If `t_drug_removal = 100`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run.""")
                 # Run model
                 @reactive.effect
                 def _():
                     # Set up parameters
                     global change_tdrug, change_tdrug_alpha_init, change_tdrug_r_init
-                    params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                    params_x0 = [5e-5, 5e-5, 0, 1]
+                    params_susceptibility = [0.05, 0.05, 0.05, 1]
                     if input.params_tdrug_recovery() == 0: tdrug_recovery = None
                     else: tdrug_recovery = int(input.params_tdrug_recovery())
                     # Run model
                     change_tdrug = ode_lotka(n_species=1)  # initialise model
-                    change_tdrug.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_tdrug.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdrug_alpha.set( pd.DataFrame(change_tdrug.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdrug_alpha_init = change_tdrug_alpha.get()
                     change_tdrug_r.set( pd.DataFrame(change_tdrug.r.reshape(1,len(change_tdrug.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdrug_r_init = change_tdrug_r.get()
-                    change_tdrug.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
+                    change_tdrug.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
                     change_tdrug_results.set(change_tdrug.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
                 @reactive.event(input.tdrug_new_alpha)
                 def _():
                     # Parameters for drug recovery
-                    params_x0 = [0.5, 0.5, 0, 1]
-                    params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                    params_x0 = [5e-5, 5e-5, 0, 1]
+                    params_susceptibility = [0.05, 0.05, 0.05, 1]
                     if input.params_tdrug_recovery() == 0: tdrug_recovery = None
                     else: tdrug_recovery = int(input.params_tdrug_recovery())
                     # Run model
-                    change_tdrug.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                    change_tdrug.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdrug_alpha.set( pd.DataFrame(change_tdrug.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdrug_r.set( pd.DataFrame(change_tdrug.r.reshape(1,len(change_tdrug.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                    change_tdrug.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.5, equilibrium=True, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
+                    change_tdrug.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
                     change_tdrug_results.set(change_tdrug.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -1182,7 +1174,7 @@ with ui.navset_card_pill(id="main_tabs"):
 
                     # Drug Strength
                     with ui.accordion_panel('Drug Strength'):
-                        ui.markdown("""The drug strength $p$ is given as a proportion on a scale of $0$ to $1$ to be able to modulate the strength of the perturbation.""")
+                        ui.markdown("""The drug strength $p$ is given as a proportion on a scale of $0$ to $1$ to be able to modulate the strength of the perturbation. When the community is much more susceptible to the drug than the donor, recipient, and transconjugant, the drug can perturb the surrounding community, allowing the donor and recipient to overgrow and conjugation to occur.""")
                         @render_plotly(width='100%')
                         def drug_strength_trans():
                             x = np.linspace(0, 1, 101)
@@ -1206,7 +1198,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         with ui.layout_columns(col_widths=[5, 7]):
                             with ui.layout_columns(col_widths=[12]):
                                 with ui.card():
-                                    ui.input_slider(id='params_drug_strength', label='Input Drug Strength', value=0.5, min=0, max=1, step=0.01, width='100%')
+                                    ui.input_slider(id='params_drug_strength', label='Input Drug Strength', value=0.7, min=0, max=1, step=0.01, width='100%')
                                     ui.input_action_button(id='drug_strength_new_alpha', label='Randomise a new interaction matrix', width='100%')
                                 # Transconjugant final numbers
                                 with ui.value_box(showcase=icon('bacteria'), theme="purple"):
@@ -1223,7 +1215,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
                                         - `connectivity` (probability of interactions): 1
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.6
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -1243,40 +1235,40 @@ with ui.navset_card_pill(id="main_tabs"):
                                             await drug_strength_render_r.update_data(change_drug_strength_r.get())
                                         ui.markdown("""
                                         <br><u>Parameters for the model</u>
-                                        - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
+                                        - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `susceptibility` (donor, recipient and transconjugant): 0.05
-                                        - `susceptibility` (community): 0.5""")
+                                        - `susceptibility` (community): 0.7""")
                                 ui.markdown("""This example simulation lets you play around with different drug strengths, $p$, on a scale between 0 and 1. The higher the drug strength, the stronger an effect it will have on the bacterial species. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run.  The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
                             # Set up parameters
                             global change_drug_strength, change_drug_strength_alpha_init, change_drug_strength_r_init
-                            params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                            params_x0 = [5e-5, 5e-5, 0, 1]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.7]
                             # Run model
                             change_drug_strength = ode_lotka(n_species=1)  # initialise model
-                            change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_drug_strength_alpha.set( pd.DataFrame(change_drug_strength.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_drug_strength_alpha_init = change_drug_strength_alpha.get()
                             change_drug_strength_r.set( pd.DataFrame(change_drug_strength.r.reshape(1,len(change_drug_strength.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_drug_strength_r_init = change_drug_strength_r.get()
-                            change_drug_strength.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength(), equilibrium=True)  # solve ode
+                            change_drug_strength.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength())  # solve ode
                             change_drug_strength_results.set(change_drug_strength.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
                         @reactive.event(input.drug_strength_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [0.5, 0.5, 0, 1]
-                            params_susceptibility = [0.05, 0.05, 0.05, 0.5]
+                            params_x0 = [5e-5, 5e-5, 0, 1]
+                            params_susceptibility = [0.05, 0.05, 0.05, 0.7]
                             # Run model
-                            change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.2, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_drug_strength_alpha.set( pd.DataFrame(change_drug_strength.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_drug_strength_r.set( pd.DataFrame(change_drug_strength.r.reshape(1,len(change_drug_strength.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_drug_strength.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength(), equilibrium=True)  # solve ode
+                            change_drug_strength.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength())  # solve ode
                             change_drug_strength_results.set(change_drug_strength.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -1335,7 +1327,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.input_slider(id='params_sus_donor', label='Donor', value=0.05, min=0, max=1, step=0.01, width='100%')
                                         ui.input_slider(id='params_sus_recip', label='Recipient', value=0.05, min=0, max=1, step=0.01, width='100%')
                                         ui.input_slider(id='params_sus_trans', label='Transconjugant', value=0.05, min=0, max=1, step=0.01, width='100%')
-                                        ui.input_slider(id='params_sus_spec1', label='Species A', value=0.5, min=0, max=1, step=0.01, width='100%')
+                                        ui.input_slider(id='params_sus_spec1', label='Species A', value=1, min=0, max=1, step=0.01, width='100%')
                                     ui.input_action_button(id='sus_new_alpha', label='Randomise a new interaction matrix', width='100%')
                                 # Transconjugant final numbers
                                 with ui.value_box(showcase=icon('bacteria'), theme="purple"):
@@ -1352,7 +1344,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
                                         - `connectivity` (probability of interactions): 1
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.2
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.6
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -1372,17 +1364,17 @@ with ui.navset_card_pill(id="main_tabs"):
                                             await sus_render_r.update_data(change_sus_r.get())
                                         ui.markdown("""
                                         <br><u>Parameters for the model</u>
-                                        - `x0` (initial donor/recipient densities): 0.5 (no transconjugants to start)
+                                        - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
-                                        - `drug_strength`: 0.5""")
-                                ui.markdown("""This example simulation lets you play around with different donor, recipient, transconjugant and community susceptibilities, $\\epsilon$, as a scale between 0 and 1. The higher the drug susceptibility, the stronger an effect it will have on the bacterial species. While in the example, the donor and transconjugants have the same susceptibilities, they can have differing susceptibilities - ie. gaining the plasmid gives an improved resistance compared to the recipient. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
+                                        - `drug_strength`: 0.7""")
+                                ui.markdown("""This example simulation lets you play around with different donor, recipient, transconjugant and community susceptibilities, $\\epsilon$, as a scale between 0 and 1. The higher the drug susceptibility, the stronger an effect it will have on the bacterial species. While in the example, the transconjugants takes from either the donor or recipient susceptibilities, it can have a new susceptibility entirely - ie. gaining the plasmid gives an improved resistance compared to the donor and recipient. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
                             # Set up parameters
                             global change_sus, change_sus_alpha_init, change_sus_r_init
-                            params_x0 = [0.5, 0.5, 0, 1]
+                            params_x0 = [5e-5, 5e-5, 0, 1]
                             params_susceptibility = [input.params_sus_donor(), input.params_sus_recip(), input.params_sus_trans(), input.params_sus_spec1()]
                             # Run model
                             change_sus = ode_lotka(n_species=1)  # initialise model
@@ -1391,20 +1383,20 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_sus_alpha_init = change_sus_alpha.get()
                             change_sus_r.set( pd.DataFrame(change_sus.r.reshape(1,len(change_sus.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_sus_r_init = change_sus_r.get()
-                            change_sus.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.1, equilibrium=True)  # solve ode
+                            change_sus.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7)  # solve ode
                             change_sus_results.set(change_sus.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
                         @reactive.event(input.sus_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [0.5, 0.5, 0, 1]
+                            params_x0 = [5e-5, 5e-5, 0, 1]
                             params_susceptibility = [input.params_sus_donor(), input.params_sus_recip(), input.params_sus_trans(), input.params_sus_spec1()]
                             # Run model
                             change_sus.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_sus_alpha.set( pd.DataFrame(change_sus.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_sus_r.set( pd.DataFrame(change_sus.r.reshape(1,len(change_sus.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_sus.solve_ode(t_start=0, t_end=2000, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.1, equilibrium=True)  # solve ode
+                            change_sus.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7)  # solve ode
                             change_sus_results.set(change_sus.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -1437,8 +1429,9 @@ with ui.navset_card_pill(id="main_tabs"):
                     ui.markdown(""" General Parameters""")
                 with ui.layout_columns(col_widths=(4,4,4, 6,6)):
                     ui.input_checkbox(id='run_equilibrium', label='Run Equilibrium Step?', value=True, width='100%')
-                    ui.input_numeric(id='tend', label='Simulation End Time', value=2000, min=0, step=1, width='100%')
-                    ui.input_numeric(id='n_species', label='Number of Species in the Community:', value=0, min=0, max=26, step=1,width='100%')
+                    ui.input_checkbox(id='crowding_effect', label='Include Crowding Effect?', value=True, width='100%')
+                    ui.input_numeric(id='tend', label='Simulation End Time', value=100, min=0, step=1, width='100%')
+                    ui.input_numeric(id='n_species', label='Number of Species in the Community:', value=1, min=0, max=26, step=1,width='100%')
                     # Set to simple
                     ui.input_action_button(id='set_to_simple', label='Set parameters to a simple one-species community', width='100%')
                     @reactive.effect
@@ -1449,27 +1442,27 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.update_slider(id='connectivity', value=1)
                         ui.update_slider(id='Pm', value=0)
                         ui.update_slider(id='s_i', value=0.1)
-                        ui.update_slider(id='sigma', value=0.2)
+                        ui.update_slider(id='sigma', value=0.6)
                         # Drugs
                         ui.update_slider(id='tdrug', value=0)
-                        ui.update_slider(id='tdrug_recovery', value=2000)
-                        ui.update_slider(id='drug_strength', value=0.5)
+                        ui.update_slider(id='tdrug_recovery', value=100)
+                        ui.update_slider(id='drug_strength', value=0.7)
                         # Conjugation
                         ui.update_slider(id='tdr', value=0)
                         ui.update_numeric(id='simple_conj', value=5e-4)
                         ui.update_slider(id='spatial_conj', value=0)
                         # Donor/Recip/Trans
-                        for sp, x in zip(['donor', 'recip', 'trans'], [0.5,0.5,0]):
+                        for sp, x in zip(['donor', 'recip', 'trans'], [5e-5,5e-5,0]):
                             exec(f"ui.update_numeric(id='x0_{sp}', value={x})")  # noqa: S102
                             exec(f"ui.update_numeric(id='growth_{sp}', value=1)")  # noqa: S102
                             exec(f"ui.update_slider(id='sus_{sp}',  value=0.05)")  # noqa: S102
                         # Other parameters
                         ui.update_checkbox(id='run_equilibrium', value=True)
-                        ui.update_numeric(id='tend', value=2000)
+                        ui.update_numeric(id='tend', value=100)
                         ui.update_numeric(id='n_species', value=1)
-                        ui.update_numeric(id='x0_spec1', value=0.5)
+                        ui.update_numeric(id='x0_spec1', value=1)
                         ui.update_numeric(id='growth_spec1', value=1)
-                        ui.update_slider(id='sus_spec1',  value=0.5)
+                        ui.update_slider(id='sus_spec1',  value=1)
                     ui.input_action_button(id='set_to_hungate', label='Set parameters to recreate in vitro experiments with a simple oligo-mouse-microbiota-19 community', width='100%')
                     @reactive.effect
                     @reactive.event(input.set_to_hungate)
@@ -1482,25 +1475,25 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.update_slider(id='sigma', value=0.04)
                         # Drugs
                         ui.update_slider(id='tdrug', value=0)
-                        ui.update_slider(id='tdrug_recovery', value= int(500 + (5/24*500)))
-                        ui.update_slider(id='drug_strength', value=0.25)
+                        ui.update_slider(id='tdrug_recovery', value= int(50 + (5/24*50)))
+                        ui.update_slider(id='drug_strength', value=0.7)
                         # Conjugation
-                        ui.update_slider(id='tdr', value=500)
-                        ui.update_numeric(id='simple_conj', value=5e-3)
+                        ui.update_slider(id='tdr', value=50)
+                        ui.update_numeric(id='simple_conj', value=5e-4)
                         ui.update_slider(id='spatial_conj', value=0.2)
                         # Donor/Recip/Trans
-                        for sp, x, s in zip(['donor', 'recip', 'trans'], [0.5,0.5,0], [0.05, 0.08, 0.05]):
+                        for sp, x, s in zip(['donor', 'recip', 'trans'], [5e-5,5e-5,0], [0.05, 0.08, 0.05]):
                             exec(f"ui.update_numeric(id='x0_{sp}', value={x})")  # noqa: S102
                             exec(f"ui.update_numeric(id='growth_{sp}', value=1)")  # noqa: S102
                             exec(f"ui.update_slider(id='sus_{sp}',  value={s})")  # noqa: S102
                         # Other parameters
                         ui.update_checkbox(id='run_equilibrium', value=False)
-                        ui.update_numeric(id='tend', value=2000)
+                        ui.update_numeric(id='tend', value=100)
                         ui.update_numeric(id='n_species', value=19)
                         for i in range(1,20):
                             exec(f"ui.update_numeric(id='x0_spec{i}', value=(1 + 0.5 * rd.random()))")  # noqa: S102
                             exec(f"ui.update_numeric(id='growth_spec{i}', value=1)")  # noqa: S102
-                            exec(f"ui.update_slider(id='sus_spec{i}',  value=(0.5 + 0.2 * rd.random()))")  # noqa: S102
+                            exec(f"ui.update_slider(id='sus_spec{i}',  value=(0.7 + 0.2 * rd.random()))")  # noqa: S102
 
             # Interaction Matrix
             with ui.card(fill=False):
@@ -1535,7 +1528,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     ui.input_slider(id='connectivity', label='Connectivity', value=1, min=0, max=1, step=0.01, width='100%')
                     ui.input_slider(id='Pm', label='Positive Interactions', value=0, min=0, max=1, step=0.01, width='100%')
                     ui.input_slider(id='s_i', label='Self-Inhibition Value', value=0.1, min=1e-4, max=1, step=0.0001, width='100%')
-                    ui.input_slider(id='sigma', label='Strength of Interaction', value=0.2, min=0.001, max=1.1, step=0.001, width='100%')
+                    ui.input_slider(id='sigma', label='Strength of Interaction', value=0.6, min=0.001, max=1.1, step=0.001, width='100%')
                     @render.text
                     def reenter_params():
                         if model_alpha_checks.get() == -1: return "The interaction matrix is hard to solve, re-enter different parameters."
@@ -1567,7 +1560,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             for i in range(1, n_species + 1):
                                 exec(f"x0.append(input.x0_spec{i}())")  # noqa: S102
                                 exec(f"susceptibility.append(input.sus_spec{i}())")  # noqa: S102
-                            model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(),
+                            model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(), crowding_effect=input.crowding_effect(),
                                             equilibrium=input.run_equilibrium(), plasmid_method='proportion', prop_strength=input.spatial_conj(),
                                             t_dr=input.tdr(), t_drug=input.tdrug(), t_drug_recovery=input.tdrug_recovery())  # solve ode
                             model_results.set(model.results)
@@ -1587,7 +1580,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             model_alpha.set( pd.DataFrame(model.alpha, columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.n_species())]) )
                             model_r.set( pd.DataFrame(model.r.reshape(1,len(model.r)),
                                                         columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.n_species())]) )
-                            model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(),
+                            model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(), crowding_effect=input.crowding_effect(),
                                             equilibrium=input.run_equilibrium(), plasmid_method='proportion', prop_strength=input.spatial_conj(),
                                             t_dr=input.tdr(), t_drug=input.tdrug(), t_drug_recovery=input.tdrug_recovery())  # solve ode
                             model_results.set(model.results)
@@ -1595,8 +1588,8 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.card():
                 with ui.card_header():
                     ui.markdown("""###### Drug Parameters""")
-                ui.input_slider(id='tdrug', label='Drug Introduction Time', value=0, min=0, max=2000, step=1, width='100%')
-                ui.input_slider(id='tdrug_recovery', label='Drug Removal Time', value=2000, min=0, max=2000, step=1, width='100%')
+                ui.input_slider(id='tdrug', label='Drug Introduction Time', value=0, min=0, max=100, step=1, width='100%')
+                ui.input_slider(id='tdrug_recovery', label='Drug Removal Time', value=100, min=0, max=100, step=1, width='100%')
                 @reactive.effect
                 def _():
                     if input.tdrug() > input.tend(): tdrug = input.tend()
@@ -1606,25 +1599,25 @@ with ui.navset_card_pill(id="main_tabs"):
                     tdrug_recovery = max(tdrug_recovery, tdrug)
                     ui.update_slider(id='tdrug', value=tdrug, max=input.tend())
                     ui.update_slider(id='tdrug_recovery', value=tdrug_recovery, max=input.tend())
-                ui.input_slider(id='drug_strength', label='Drug Strength', value=0.5, min=0, max=1, step=0.01, width='100%')                                                       
+                ui.input_slider(id='drug_strength', label='Drug Strength', value=0.7, min=0, max=1, step=0.01, width='100%')                                                       
             # Conjugation Parameters
             with ui.card():
                 with ui.card_header():
                     ui.markdown("""###### Conjugation Parameters""")
-                ui.input_slider(id='tdr', label='Donor and Recipient Introduction Time', value=0, min=0, max=2000, step=1, width='100%')
+                ui.input_slider(id='tdr', label='Donor and Recipient Introduction Time', value=0, min=0, max=100, step=1, width='100%')
                 @reactive.effect
                 def _():
                     if input.tdr() > input.tend(): tdr = input.tend()
                     else: tdr = input.tdr()
                     ui.update_slider(id='tdr', value=tdr, max=input.tend())
                 ui.input_numeric(id='simple_conj', label='Conjugation Rate', value=5e-4, min=5e-10, max=5, width='100%')
-                ui.input_slider(id='spatial_conj', label='Strength of Spatial Inhibition', value=0, min=0, max=1, step=0.01, width='100%')
+                ui.input_slider(id='spatial_conj', label='Strength of Spatial Inhibition', value=0.1, min=0, max=1, step=0.01, width='100%')
             # Donor parameters
             with ui.card(fill=False):
                 with ui.card_header():
                     ui.markdown("""###### Donor Parameters""")
                 with ui.layout_columns(col_widths=(6,6,6,6)):
-                    ui.input_numeric(id='x0_donor', label='Starting Density', value=0.5, min=0.01, step=0.01, width='100%')
+                    ui.input_numeric(id='x0_donor', label='Starting Density', value=5e-5, min=0, step=0.00001, width='100%')
                     ui.input_numeric(id='growth_donor', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
                     ui.input_slider(id='sus_donor', label='Susceptibility', value=0.05, min=0, max=1, step=0.01, width='100%')
                     ui.input_action_button(id='equal_growths_model', label='Set all growth rates to donor', width='100%')
@@ -1640,7 +1633,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 with ui.card_header():
                     ui.markdown("""###### Recipient Parameters""")
                 with ui.layout_columns(col_widths=(6,6,12)):
-                    ui.input_numeric(id='x0_recip', label='Starting Density', value=0.5, min=0.01, step=0.01, width='100%')
+                    ui.input_numeric(id='x0_recip', label='Starting Density', value=5e-5, min=0, step=0.0001, width='100%')
                     ui.input_numeric(id='growth_recip', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
                     ui.input_slider(id='sus_recip', label='Susceptibility', value=0.05, min=0, max=1, step=0.01, width='100%')
             # Transconjugant Parameters
@@ -1648,7 +1641,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 with ui.card_header():
                     ui.markdown("""###### Transconjugant Parameters""")
                 with ui.layout_columns(col_widths=(6,6,12)):
-                    ui.input_numeric(id='x0_trans', label='Starting Density', value=0, min=0.01, step=0.01, width='100%')
+                    ui.input_numeric(id='x0_trans', label='Starting Density', value=0, min=0, step=0.0001, width='100%')
                     ui.input_numeric(id='growth_trans', label='Instrinsic Growth', value=1, min=0.01, step=0.01, width='100%')
                     ui.input_slider(id='sus_trans', label='Susceptibility', value=0.05, min=0, max=1, step=0.01, width='100%')
 
@@ -1875,7 +1868,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                             columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.n_species())]) )
                     model_r_init = pd.DataFrame(model.r.reshape(1,len(model.r)),
                                             columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.n_species())])
-                    model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(),
+                    model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(), crowding_effect=input.crowding_effect(),
                                     equilibrium=input.run_equilibrium(), plasmid_method='proportion', prop_strength=input.spatial_conj(),
                                     t_dr=input.tdr(), t_drug=input.tdrug(), t_drug_recovery=input.tdrug_recovery())  # solve ode
                     model_results.set(model.results)
@@ -1890,7 +1883,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     model_alpha.set( pd.DataFrame(model.alpha, columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.n_species())]) )
                     model_r.set( pd.DataFrame(model.r.reshape(1,len(model.r)),
                                             columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.n_species())]) )
-                    model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(),
+                    model.solve_ode(t_start=0, t_end=input.tend(), x0=x0, conjugation_rate=input.simple_conj(), susceptibility=susceptibility, drug_level=input.drug_strength(), crowding_effect=input.crowding_effect(),
                                     equilibrium=input.run_equilibrium(), plasmid_method='proportion', prop_strength=input.spatial_conj(),
                                     t_dr=input.tdr(), t_drug=input.tdrug(), t_drug_recovery=input.tdrug_recovery())  # solve ode
                     model_results.set(model.results)
