@@ -376,7 +376,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         "The interaction matrix used for this run is:"
                                         @render.data_frame
                                         def conn_render_interaction_matrix():
-                                            return render.DataGrid(change_conn_alpha_init, height='175px', width='500px')
+                                            return render.DataGrid(change_conn_alpha_init, height='114px', width='500px')
                                         @reactive.effect
                                         async def _():
                                             await conn_render_interaction_matrix.update_data(change_conn_alpha.get())
@@ -389,7 +389,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                             await conn_render_r.update_data(change_conn_r.get())
                                         ui.markdown("""
                                         <br><u>Parameters for the model</u>
-                                        - `x0` (initial donor/recipient densities): $5\\times 10^{-5} (no transconjugants to start)
+                                        - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
                                 ui.markdown("""This example simulation lets you play around with different connectivity, $C$, proportions between species in the community. The more connected the community, the more of an impact the densities of each species will have on each others' growth and population density. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
@@ -1427,11 +1427,11 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.card(fill=False):
                 with ui.card_header():
                     ui.markdown(""" General Parameters""")
-                with ui.layout_columns(col_widths=(4,4,4, 6,6)):
+                with ui.layout_columns(col_widths=(3,3,3,3, 6,6)):
                     ui.input_checkbox(id='run_equilibrium', label='Run Equilibrium Step?', value=True, width='100%')
                     ui.input_checkbox(id='crowding_effect', label='Include Crowding Effect?', value=True, width='100%')
                     ui.input_numeric(id='tend', label='Simulation End Time', value=100, min=0, step=1, width='100%')
-                    ui.input_numeric(id='n_species', label='Number of Species in the Community:', value=1, min=0, max=26, step=1,width='100%')
+                    ui.input_numeric(id='n_species', label='Number of Commensal Species', value=1, min=0, max=26, step=1,width='100%')
                     # Set to simple
                     ui.input_action_button(id='set_to_simple', label='Set parameters to a simple one-species community', width='100%')
                     @reactive.effect
