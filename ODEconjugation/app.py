@@ -1413,10 +1413,11 @@ with ui.navset_card_pill(id="main_tabs"):
         Once the parameters of the model to set things up as described, and the interaction matrix and growth rates have been calculated, the system of ODEs can be solved. The `scipy` function `solve_ivp()` is used from `t_start < t < t_end` to solve the system of equations:
         $$ \\begin{bmatrix} dDdt \\\\\ dRdt \\\\\ dTdt \\\\\ dC_1dt \\\\\ ... \\end{bmatrix} =
         \\begin{bmatrix} dX_Ddt \\\\\ dX_Rdt \\\\\ dX_Tdt \\\\\ dX_{C_1}dt \\\\\ ... \\end{bmatrix} -
-        \\begin{bmatrix} \\epsilon_Dp(t) \\\\\ \\epsilon_Rp(t) \\\\\ \\epsilon_Tp(t) \\\\\ \\epsilon_{C_1}p(t) \\\\\ ... \\end{bmatrix} +
+        \\begin{bmatrix} X_Dm_D \\\\\ X_Rm_R \\\\\ X_Tm_T \\\\\ X_{C_1}m_{C_1} \\\\\ ... \\end{bmatrix} -
+        \\begin{bmatrix} X_D\\epsilon_Dp(t) \\\\\ X_R\\epsilon_Rp(t) \\\\\ X_T\\epsilon_Tp(t) \\\\\ X_{C_1}\\epsilon_{C_1}p(t) \\\\\ ... \\end{bmatrix} +
         \\begin{bmatrix} 0 \\\\\ - \\gamma \\\\\ \\gamma \\\\\ 0 \\\\\ ... \\end{bmatrix}
         $$
-        where $$dXdt = X \\left[ r + (\\mathbf{\\alpha} \\times \\mathbf{\\overrightarrow{X}}) \\right]$$
+        where $\\mathbf{dXdt} = \\mathbf{X} \\left[ r + (\\mathbf{\\alpha} \\times \\mathbf{X}) \\right]$ and $\\mathbf{m} = 0.001 + 0.01\\mathbf{X}$<br><br>
         `solve_ivp` outputs the array of every timestep a calculation was done, as well as `(t_end + 1) x n_species` array with the population density for each species at each timepoint. This can be used for further analysis and graphing to view the outputs.<br><br>
         Here you can adjust any and all parameters to create a custom run of the model!<br><br>""")
 
