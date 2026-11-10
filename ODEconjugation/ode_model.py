@@ -285,10 +285,10 @@ class ode_lotka:
         # Calculate susceptibility to drug, based on time-dependent drug effect
         drug_effect = np.array(susceptibility) * drug_level[int(np.round(t))]
         # Define specific derivatives accounting for plasmids and return
-        dDdt = dXdt[0] - drug_effect[0] * X[0] - m[0]  # donor only affected by crowding + drugs
-        dRdt = dXdt[1] - drug_effect[1] * X[1] - m[1]- plasmid_transfer  # recipient loses pop to transconjugants
-        dTdt = dXdt[2] - drug_effect[2] * X[2] - m[2] + plasmid_transfer  # transconjugant gains pop from recipients
-        dCdt = dXdt[3:] - drug_effect[3:] * X[3:] - m[3:]  # community only affected by crowding + drugs
+        dDdt = dXdt[0] - m[0] - drug_effect[0] * X[0]  # donor only affected by crowding + drugs
+        dRdt = dXdt[1] - m[1] - drug_effect[1] * X[1] - plasmid_transfer  # recipient loses pop to transconjugants
+        dTdt = dXdt[2] - m[2] - drug_effect[2] * X[2] + plasmid_transfer  # transconjugant gains pop from recipients
+        dCdt = dXdt[3:] - m[3:] - drug_effect[3:] * X[3:]  # community only affected by crowding + drugs
         return np.concat([[dDdt], [dRdt], [dTdt], dCdt], axis=0)
 
     @staticmethod
