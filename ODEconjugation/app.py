@@ -92,7 +92,7 @@ with ui.navset_card_pill(id="main_tabs"):
     with ui.nav_panel("Introduction"):
         ui.markdown("""
             # **Overview**
-            The experiment we are working on is to determining the effect of various drugs on the gut microbiome, which then may enable or prevent the spread of antibiotic resistance genes \\(ARGs). The current theory is that if drugs such as antibiotics successfully peturb the microbiome, if the donor and recipient are resistant, they can overgrow, increasing the odds they would come in contact with each other, allowing conjugation to occur. We also want to understand the influence of spatial structure within the gut - where different species are localised in the gut microbiome - on this phenomenon. While we are currently conducting *in vitro* and *in vivo* mouse experiments, we would also like to develop a model which explores the dynamics of this.
+            The experiment we are working on is to determining the effect of various drugs on the gut microbiome, which then may enable or prevent the spread of antibiotic resistance genes \\(ARGs). The current theory is that if drugs such as antibiotics successfully peturb the microbiome, if the donor and recipient are resistant, they can overgrow, increasing the odds they would come in contact with each other, allowing conjugation to occur. We also want to understand the influence of spatial structure within the gut - where different species are localised in the gut microbiome - on this phenomenon. While we are currently conducting *in vitro* and *in vivo* experiments, we would also like to develop a model which explores the dynamics of this.
             <br><br>
             There are multiple different modelling approaches for studying the microbiome ([Kumar, 2019](https://www.nature.com/articles/s41564-019-0491-9#Sec11)). The two most relevant methods are ordinary differential equation (ODE)-based modelling, and agent-based modelling (ABM). Here we will focus on ODE-based modelling. ODE-based modelling has been used to model monocultures or simple co-culture systems (minimal species), using rate equations to measure the change in different variables in time - such as species growth or plasmid transfer. The rate equations can be used to create mass balances (a set of ODEs that can be solved using standard computational solvers). These ODEs allow the simulation of dynamic interactions between species, but they often have to be simplified to reduce the number of variables and parameters.
             <br><hr>
@@ -114,7 +114,7 @@ with ui.navset_card_pill(id="main_tabs"):
             * $\\gamma$ is the term considering plasmid transfer, and how that affects the population (ie. changing some cells from recipients to transconjugants)
             <br><hr>
             ### <u>This Programme</u>
-            The goal of this programme is to allow users to interactively explore the effect of adjusting different parameters in the Lotka-Volterra model on the number of transconjugants formed. Vist the `Explore Parameters` tab to identify the impact of each parameter on the model. Check out the `Run Model` tab to run a model complete with all your own parameters.<br><br>""")
+            The goal of this programme is to allow users to interactively explore the effect of adjusting different parameters in the Lotka-Volterra model on the number of transconjugants formed. Vist the `Explore Parameters` tab to identify the impact of each parameter on the model. Check out the `Run Model` tab to run a model complete with all your own parameters. You can also see simulations that mimic experimental conditions on the `Experimental Conditions` tab.<br><br>""")
 
 
     # PARAMETER PANELS
@@ -1896,6 +1896,140 @@ with ui.navset_card_pill(id="main_tabs"):
             def plot_model():
                 if model_alpha_checks.get() != -1: return plot_species_densities(model_results.get(), input.n_species())
 
+
+
+    # RUN THE MODEL PANEL
+    with ui.nav_panel("Experimental Conditions"):
+
+        # Introduction
+        ui.markdown("""
+        ## **Experimental Conditions**
+        Now that a model has been constructed, incorporating parameters that allow us to:
+        - model species growth - where intrinsic growth rates $\\approx 1$
+        - include competitive or cooperative species interactions (from the gLV model) - with self-inhibition set as $0.1$
+        - incorporate conjugation between donor and recipient species - here set at very low rates of $5\\times10^{-4}$
+        - consider the crowding effect (for impact of spatial or nutrient competition) - where $\\mathbf{m} = 0.001+0.01\\mathbf{X}$
+        - allow antibiotic perturbation<br>
+        we can now try to replicate experimental conditions.<hr>""")
+
+        # Establishing Colonisation Resistance
+        ui.markdown("""
+        ### Establishing Colonisation Resistance in a Simple Community
+        Let's start with a model with 1 commensal species, which will be used to represent the gut community. The model will be run 100 times to generate different interaction matrices, and determine the overall behaviour with the given conditions.<br><br>
+        In a model where this commensal species does not interact with the donor, recpient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.""")
+        @render_plotly(width='100%', height='40%')
+        def plot_no_cr():
+            # List all labels to print
+            colours = ['maroon', 'darkorange', 'black', 'gold']
+            all_labels = ['Donor', 'Recipient', 'Transconjugants', 'Species A']
+            no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
+            # Render figure layouts
+            fig = go.Figure()
+            fig.update_layout(plot_bgcolor='#eff5fa')
+            # Render plot
+            for i, species in enumerate(all_labels):
+                fig.add_trace(go.Scatter(x=np.arange(0, 101),
+                                         y=no_cr_trans.mean(axis=0)[i],
+                                         mode='lines',
+                                         name=species,
+                                         legendgroup=species,
+                                         line={'color': colours[i]}))
+            fig.update_layout(height=1000,
+                              font={'size': 14},
+                              title='<b>Population Density with No Colonisation Resistance<b>',
+                              title_font={'size': 20},
+                              xaxis_title='Time',
+                              xaxis={'tickfont': {'size': 18}},
+                              yaxis_title='Species Population Density',
+                              yaxis={'tickfont': {'size':18}},
+                              legend={"title": 'Species'})
+            return fig
+        ui.markdown("""
+        When we then adjust the parameters so that community has strong negative interactions with the donor, recipient and transconjugants (connectivity $C=1$ with $\\sigma=0.6$), the community provides colonisation resistance, suppressing the growth of the donor and recipients so that fewer transconjugants are able to form.<br><br>
+        """)
+        @render_plotly(width='100%', height='40%')
+        def plot_cr():
+            # List all labels to print
+            colours = ['maroon', 'darkorange', 'black', 'gold']
+            all_labels = ['Donor', 'Recipient', 'Transconjugants', 'Species A']
+            cr_trans = np.load(f'{data_dir}/exp_cr_trans.npy')
+            # Render figure layouts
+            fig = go.Figure()
+            fig.update_layout(plot_bgcolor='#eff5fa')
+            # Render plot
+            for i, species in enumerate(all_labels):
+                fig.add_trace(go.Scatter(x=np.arange(0, 101),
+                                            y=cr_trans.mean(axis=0)[i],
+                                            mode='lines',
+                                            name=species,
+                                            legendgroup=species,
+                                            line={'color': colours[i]}))
+            fig.update_layout(height=1000,
+                                font={'size': 14},
+                                title='<b>Population Density with Colonisation Resistance<b>',
+                                title_font={'size': 20},
+                                xaxis_title='Time',
+                                xaxis={'tickfont': {'size': 18}},
+                                yaxis_title='Species Population Density',
+                                yaxis={'tickfont': {'size':18}},
+                                legend={"title": 'Species'})
+            return fig
+        ui.markdown("""
+        However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.7$ and susceptibility, $\\epsilon=1$), compared to a resistant donor and recipient strain ($\\epsilon=0.05$), colonisation resistance is removed. Meanwhile, the donor and recipient strains are able to grow much more effectively and transconjugants can form.<br><br>
+        """)
+        @render_plotly(width='100%', height='40%')
+        def plot_cr_perturn():
+            # List all labels to print
+            colours = ['maroon', 'darkorange', 'black', 'gold']
+            all_labels = ['Donor', 'Recipient', 'Transconjugants', 'Species A']
+            cr_perturb = np.load(f'{data_dir}/exp_cr_perturb.npy')
+            # Render figure layouts
+            fig = go.Figure()
+            fig.update_layout(plot_bgcolor='#eff5fa')
+            # Render plot
+            for i, species in enumerate(all_labels):
+                fig.add_trace(go.Scatter(x=np.arange(0, 101),
+                                            y=cr_perturb.mean(axis=0)[i],
+                                            mode='lines',
+                                            name=species,
+                                            legendgroup=species,
+                                            line={'color': colours[i]}))
+            fig.update_layout(height=1000,
+                              font={'size': 14},
+                              title='<b>Population Density with Colonisation Resistance Removed<b>',
+                              title_font={'size': 20},
+                              xaxis_title='Time',
+                              xaxis={'tickfont': {'size': 18}},
+                              yaxis_title='Species Population Density',
+                              yaxis={'tickfont': {'size':18}},
+                              legend={"title": 'Species'})
+            return fig
+        ui.markdown("""You can see the difference between the donor, recipient, and transconjugant densities under these three conditions.""")
+        @render_plotly(width="100%", height="40%")
+        def cr_bar_plots():
+            no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
+            cr_trans = np.load(f'{data_dir}/exp_cr_trans.npy')
+            cr_perturb = np.load(f'{data_dir}/exp_cr_perturb.npy')
+            donors = [no_cr_trans[:,0,-1].mean(axis=0), cr_trans[:,0,-1].mean(axis=0), cr_perturb[:,0,-1].mean(axis=0)]
+            recipients = [no_cr_trans[:,1,-1].mean(axis=0), cr_trans[:,1,-1].mean(axis=0), cr_perturb[:,1,-1].mean(axis=0)]
+            trans = [no_cr_trans[:,2,-1].mean(axis=0), cr_trans[:,2,-1].mean(axis=0), cr_perturb[:,2,-1].mean(axis=0)]
+            condition=['no CR', 'has CR', 'CR + perturb community']
+            fig = go.Figure()
+            fig.update_layout(plot_bgcolor='#eff5fa')
+            fig.add_trace(go.Bar(name='donors', x=condition, y=donors))
+            fig.add_trace(go.Bar(name='recipients', x=condition, y=recipients))
+            fig.add_trace(go.Bar(name='transconjuants', x=condition, y=trans))
+            # Change the bar mode
+            fig.update_layout(barmode='group',
+                              height=1000,
+                              font={'size': 14},
+                              title='<b>Final Population Density<b>',
+                              title_font={'size': 20},
+                              xaxis_title='Condition',
+                              xaxis={'tickfont': {'size': 18}},
+                              yaxis_title='Species Population Density',
+                              yaxis={'tickfont': {'size':18}})
+            return fig
 
 
 
