@@ -6,7 +6,7 @@ def get_readme():
         return f.read()
 
 setup(name='ODEconjugation',
-      version='0.1',
+      version='2.1.1',
       description='A package to model the spread of a plasmid by conjugation within a bacterial community perturbed by antibiotics',
       long_description=get_readme(),
       author='AnMei Daniels',
