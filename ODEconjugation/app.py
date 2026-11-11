@@ -8,6 +8,7 @@ import numpy as np
 import numpy.random as rd
 from string import ascii_uppercase
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import plotly.express as px
 from shiny import reactive
 from shiny.express import input, render, ui
@@ -1995,7 +1996,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                             line={'color': colours[i]}))
             fig.update_layout(height=450,
                               font={'size': 14},
-                              title='<b>Population Density with Colonisation Resistance Removed<b>',
+                              title='<b>Population Density with Antibiotic Perturbation<b>',
                               title_font={'size': 20},
                               xaxis_title='Time',
                               xaxis={'tickfont': {'size': 18}},
@@ -2003,7 +2004,7 @@ with ui.navset_card_pill(id="main_tabs"):
                               yaxis={'tickfont': {'size':18}},
                               legend={"title": 'Species'})
             return fig
-        ui.markdown("""<br>You can see the difference between the donor, recipient, and transconjugant densities under these three conditions.<br><br>""")
+        ui.markdown("""<br>You can see the difference between the final donor, recipient, and transconjugant densities under these three conditions. The donor and recipient grow to a much higher density without colonisation resistance, and a higher density of transconjugants forms than when there is colonisation resistance. However, with the antibiotics that perturb the community, the donor and recipient grow again, though not to the same densities as before. However, this allows more transconjugants to form.<br><br>""")
         @render_plotly(width="100%", height='450px')
         def cr_bar_plots():
             no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
@@ -2012,7 +2013,7 @@ with ui.navset_card_pill(id="main_tabs"):
             donors = [no_cr_trans[:,0,-1].mean(axis=0), cr_trans[:,0,-1].mean(axis=0), cr_perturb[:,0,-1].mean(axis=0)]
             recipients = [no_cr_trans[:,1,-1].mean(axis=0), cr_trans[:,1,-1].mean(axis=0), cr_perturb[:,1,-1].mean(axis=0)]
             trans = [no_cr_trans[:,2,-1].mean(axis=0), cr_trans[:,2,-1].mean(axis=0), cr_perturb[:,2,-1].mean(axis=0)]
-            condition=['no CR', 'has CR', 'CR + perturb community']
+            condition=['no CR', 'has CR', 'CR + antibiotic']
             fig = go.Figure()
             fig.update_layout(plot_bgcolor='#eff5fa')
             fig.add_trace(go.Bar(name='donors', x=condition, y=donors))
@@ -2022,12 +2023,47 @@ with ui.navset_card_pill(id="main_tabs"):
             fig.update_layout(barmode='group',
                               height=450,
                               font={'size': 14},
-                              title='<b>Final Population Density<b>',
+                              title='<b>Final Population Density Without and With Colonisation Resistance<b>',
                               title_font={'size': 20},
                               xaxis_title='Condition',
                               xaxis={'tickfont': {'size': 18}},
                               yaxis_title='Species Population Density',
                               yaxis={'tickfont': {'size':18}})
+            return fig
+        ui.markdown("""<br>Similarly, without colonisation resistance, the range of donor and recipient susceptibilities that transconjugants can grow is much greater. There is a narrower range of susceptibilities that transconjugants form with colonisation resistance. However, with a community susceptible to antibiotics, even when it is highly resistant to colonisation, it can be perturbed enough to allow transconjugants to form again at a wider range of donor and recipient susceptibilities.""")
+        @render_plotly(width='100%', height='545px')
+        def sus_plot_no_cr():
+            x = np.linspace(0, 1, 21)
+            y = np.linspace(0, 1, 21)
+            sus_plot_no_cr = np.load(f'{data_dir}/exp_no_cr_sus.npy').mean(axis=2)
+            sus_plot_cr = np.load(f'{data_dir}/exp_cr_sus.npy').mean(axis=2)
+            sus_plot_cr_perturb = np.load(f'{data_dir}/exp_cr_perturb_sus.npy').mean(axis=2)
+            # Render figure layouts
+            fig = make_subplots(rows=1, cols=3, subplot_titles=("Without Colonisation Resistance (CR)", "With Colonisation Resistance(CR)", "With CR and Antibiotic Perturbation"))
+            fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_no_cr,
+                                     coloraxis="coloraxis",
+                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
+                          row=1, col=1)
+            fig.update_xaxes(title_text="Donor Susceptibility", row=1, col=1)
+            fig.update_yaxes(title_text="Recipient Susceptibility", row=1, col=1)
+            fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_cr,
+                                     coloraxis="coloraxis",
+                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
+                          row=1, col=2)
+            fig.update_xaxes(title_text="Donor Susceptibility", row=1, col=2)
+            fig.update_yaxes(title_text="Recipient Susceptibility", row=1, col=2)
+            fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_cr_perturb,
+                                     coloraxis="coloraxis",
+                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
+                          row=1, col=3)
+            fig.update_xaxes(title_text="Donor Susceptibility",row=1, col=3)
+            fig.update_yaxes(title_text="Recipient Susceptibility", row=1, col=3)
+            fig.update_layout(plot_bgcolor='#eff5fa',
+                              height=545,
+                              margin={'t':55},
+                              coloraxis = {'colorscale':'magma', 'colorbar':{'title':'Final Transconjugant Pop Density','orientation':'h', 'y':-0.28}},
+                              title_text='<b>Conjugation Rate on Change in Transconjugant Population Density</b>',
+                              title_font={'size': 20})
             return fig
 
 
