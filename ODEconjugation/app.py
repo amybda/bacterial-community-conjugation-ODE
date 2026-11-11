@@ -8,6 +8,7 @@ import numpy as np
 import numpy.random as rd
 from string import ascii_uppercase
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import plotly.express as px
 from shiny import reactive
 from shiny.express import input, render, ui
@@ -1613,6 +1614,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     ui.update_slider(id='tdr', value=tdr, max=input.tend())
                 ui.input_numeric(id='simple_conj', label='Conjugation Rate', value=5e-4, min=5e-10, max=5, width='100%')
                 ui.input_slider(id='spatial_conj', label='Strength of Spatial Inhibition', value=0.1, min=0, max=1, step=0.01, width='100%')
+            
             # Donor parameters
             with ui.card(fill=False):
                 with ui.card_header():
@@ -1910,14 +1912,16 @@ with ui.navset_card_pill(id="main_tabs"):
         - incorporate conjugation between donor and recipient species - here set at very low rates of $5\\times10^{-4}$
         - consider the crowding effect (for impact of spatial or nutrient competition) - where $\\mathbf{m} = 0.001+0.01\\mathbf{X}$
         - allow antibiotic perturbation<br>
-        we can now try to replicate experimental conditions.<hr>""")
+        we can now try to replicate experimental conditions.
+        <hr>""")
 
         # Establishing Colonisation Resistance
         ui.markdown("""
         ### Establishing Colonisation Resistance in a Simple Community
         Let's start with a model with 1 commensal species, which will be used to represent the gut community. The model will be run 100 times to generate different interaction matrices, and determine the overall behaviour with the given conditions.<br><br>
-        In a model where this commensal species does not interact with the donor, recpient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.""")
-        @render_plotly(width='100%', height='40%')
+        In a model where this commensal species does not interact with the donor, recpient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.
+        <br><br>""")
+        @render_plotly(width='100%', height='450px')
         def plot_no_cr():
             # List all labels to print
             colours = ['maroon', 'darkorange', 'black', 'gold']
@@ -1929,12 +1933,12 @@ with ui.navset_card_pill(id="main_tabs"):
             # Render plot
             for i, species in enumerate(all_labels):
                 fig.add_trace(go.Scatter(x=np.arange(0, 101),
-                                         y=no_cr_trans.mean(axis=0)[i],
-                                         mode='lines',
-                                         name=species,
-                                         legendgroup=species,
-                                         line={'color': colours[i]}))
-            fig.update_layout(height=1000,
+                                        y=no_cr_trans.mean(axis=0)[i],
+                                        mode='lines',
+                                        name=species,
+                                        legendgroup=species,
+                                        line={'color': colours[i]}))
+            fig.update_layout(height=450,
                               font={'size': 14},
                               title='<b>Population Density with No Colonisation Resistance<b>',
                               title_font={'size': 20},
@@ -1944,10 +1948,8 @@ with ui.navset_card_pill(id="main_tabs"):
                               yaxis={'tickfont': {'size':18}},
                               legend={"title": 'Species'})
             return fig
-        ui.markdown("""
-        When we then adjust the parameters so that community has strong negative interactions with the donor, recipient and transconjugants (connectivity $C=1$ with $\\sigma=0.6$), the community provides colonisation resistance, suppressing the growth of the donor and recipients so that fewer transconjugants are able to form.<br><br>
-        """)
-        @render_plotly(width='100%', height='40%')
+        ui.markdown("""<br>When we then adjust the parameters so that community has strong negative interactions with the donor, recipient and transconjugants (connectivity $C=1$ with $\\sigma=0.6$), the community provides colonisation resistance, suppressing the growth of the donor and recipients so that fewer transconjugants are able to form.<br><br>""")
+        @render_plotly(width='100%', height='450px')
         def plot_cr():
             # List all labels to print
             colours = ['maroon', 'darkorange', 'black', 'gold']
@@ -1964,20 +1966,18 @@ with ui.navset_card_pill(id="main_tabs"):
                                             name=species,
                                             legendgroup=species,
                                             line={'color': colours[i]}))
-            fig.update_layout(height=1000,
-                                font={'size': 14},
-                                title='<b>Population Density with Colonisation Resistance<b>',
-                                title_font={'size': 20},
-                                xaxis_title='Time',
-                                xaxis={'tickfont': {'size': 18}},
-                                yaxis_title='Species Population Density',
-                                yaxis={'tickfont': {'size':18}},
-                                legend={"title": 'Species'})
+            fig.update_layout(height=450,
+                              font={'size': 14},
+                              title='<b>Population Density with Colonisation Resistance<b>',
+                              title_font={'size': 20},
+                              xaxis_title='Time',
+                              xaxis={'tickfont': {'size': 18}},
+                              yaxis_title='Species Population Density',
+                              yaxis={'tickfont': {'size':18}},
+                              legend={"title": 'Species'})
             return fig
-        ui.markdown("""
-        However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.7$ and susceptibility, $\\epsilon=1$), compared to a resistant donor and recipient strain ($\\epsilon=0.05$), colonisation resistance is removed. Meanwhile, the donor and recipient strains are able to grow much more effectively and transconjugants can form.<br><br>
-        """)
-        @render_plotly(width='100%', height='40%')
+        ui.markdown("""<br>However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.7$ and susceptibility, $\\epsilon=1$), compared to a resistant donor and recipient strain ($\\epsilon=0.05$), colonisation resistance is removed. Meanwhile, the donor and recipient strains are able to grow much more effectively and transconjugants can form.<br><br>""")
+        @render_plotly(width='100%', height='450px')
         def plot_cr_perturn():
             # List all labels to print
             colours = ['maroon', 'darkorange', 'black', 'gold']
@@ -1994,9 +1994,9 @@ with ui.navset_card_pill(id="main_tabs"):
                                             name=species,
                                             legendgroup=species,
                                             line={'color': colours[i]}))
-            fig.update_layout(height=1000,
+            fig.update_layout(height=450,
                               font={'size': 14},
-                              title='<b>Population Density with Colonisation Resistance Removed<b>',
+                              title='<b>Population Density with Antibiotic Perturbation<b>',
                               title_font={'size': 20},
                               xaxis_title='Time',
                               xaxis={'tickfont': {'size': 18}},
@@ -2004,8 +2004,8 @@ with ui.navset_card_pill(id="main_tabs"):
                               yaxis={'tickfont': {'size':18}},
                               legend={"title": 'Species'})
             return fig
-        ui.markdown("""You can see the difference between the donor, recipient, and transconjugant densities under these three conditions.""")
-        @render_plotly(width="100%", height="40%")
+        ui.markdown("""<br>You can see the difference between the final donor, recipient, and transconjugant densities under these three conditions. The donor and recipient grow to a much higher density without colonisation resistance, and a higher density of transconjugants forms than when there is colonisation resistance. However, with the antibiotics that perturb the community, the donor and recipient grow again, though not to the same densities as before. However, this allows more transconjugants to form.<br><br>""")
+        @render_plotly(width="100%", height='450px')
         def cr_bar_plots():
             no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
             cr_trans = np.load(f'{data_dir}/exp_cr_trans.npy')
@@ -2013,7 +2013,7 @@ with ui.navset_card_pill(id="main_tabs"):
             donors = [no_cr_trans[:,0,-1].mean(axis=0), cr_trans[:,0,-1].mean(axis=0), cr_perturb[:,0,-1].mean(axis=0)]
             recipients = [no_cr_trans[:,1,-1].mean(axis=0), cr_trans[:,1,-1].mean(axis=0), cr_perturb[:,1,-1].mean(axis=0)]
             trans = [no_cr_trans[:,2,-1].mean(axis=0), cr_trans[:,2,-1].mean(axis=0), cr_perturb[:,2,-1].mean(axis=0)]
-            condition=['no CR', 'has CR', 'CR + perturb community']
+            condition=['no CR', 'has CR', 'CR + antibiotic']
             fig = go.Figure()
             fig.update_layout(plot_bgcolor='#eff5fa')
             fig.add_trace(go.Bar(name='donors', x=condition, y=donors))
@@ -2021,14 +2021,49 @@ with ui.navset_card_pill(id="main_tabs"):
             fig.add_trace(go.Bar(name='transconjuants', x=condition, y=trans))
             # Change the bar mode
             fig.update_layout(barmode='group',
-                              height=1000,
+                              height=450,
                               font={'size': 14},
-                              title='<b>Final Population Density<b>',
+                              title='<b>Final Population Density Without and With Colonisation Resistance<b>',
                               title_font={'size': 20},
                               xaxis_title='Condition',
                               xaxis={'tickfont': {'size': 18}},
                               yaxis_title='Species Population Density',
                               yaxis={'tickfont': {'size':18}})
+            return fig
+        ui.markdown("""<br>Similarly, without colonisation resistance, the range of donor and recipient susceptibilities that transconjugants can grow is much greater. There is a narrower range of susceptibilities that transconjugants form with colonisation resistance. However, with a community susceptible to antibiotics, even when it is highly resistant to colonisation, it can be perturbed enough to allow transconjugants to form again at a wider range of donor and recipient susceptibilities.""")
+        @render_plotly(width='100%', height='545px')
+        def sus_plot_no_cr():
+            x = np.linspace(0, 1, 21)
+            y = np.linspace(0, 1, 21)
+            sus_plot_no_cr = np.load(f'{data_dir}/exp_no_cr_sus.npy').mean(axis=2)
+            sus_plot_cr = np.load(f'{data_dir}/exp_cr_sus.npy').mean(axis=2)
+            sus_plot_cr_perturb = np.load(f'{data_dir}/exp_cr_perturb_sus.npy').mean(axis=2)
+            # Render figure layouts
+            fig = make_subplots(rows=1, cols=3, subplot_titles=("Without Colonisation Resistance (CR)", "With Colonisation Resistance(CR)", "With CR and Antibiotic Perturbation"))
+            fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_no_cr,
+                                     coloraxis="coloraxis",
+                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
+                          row=1, col=1)
+            fig.update_xaxes(title_text="Donor Susceptibility", row=1, col=1)
+            fig.update_yaxes(title_text="Recipient Susceptibility", row=1, col=1)
+            fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_cr,
+                                     coloraxis="coloraxis",
+                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
+                          row=1, col=2)
+            fig.update_xaxes(title_text="Donor Susceptibility", row=1, col=2)
+            fig.update_yaxes(title_text="Recipient Susceptibility", row=1, col=2)
+            fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_cr_perturb,
+                                     coloraxis="coloraxis",
+                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
+                          row=1, col=3)
+            fig.update_xaxes(title_text="Donor Susceptibility",row=1, col=3)
+            fig.update_yaxes(title_text="Recipient Susceptibility", row=1, col=3)
+            fig.update_layout(plot_bgcolor='#eff5fa',
+                              height=545,
+                              margin={'t':55},
+                              coloraxis = {'colorscale':'magma', 'colorbar':{'title':'Final Transconjugant Pop Density','orientation':'h', 'y':-0.28}},
+                              title_text='<b>Conjugation Rate on Change in Transconjugant Population Density</b>',
+                              title_font={'size': 20})
             return fig
 
 
