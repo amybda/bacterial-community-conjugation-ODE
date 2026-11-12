@@ -451,7 +451,7 @@ class ode_lotka:
                     self.results.y = np.concat([self.results.y, results.y[:,1:]], axis=1)
         
     def plot_results(self, t, y, title, figsize=(7,6), save_fig=False, filename='microbiota_density',
-                     drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
+                     ylim=None, drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
         """Plots the graph of the community finding equilibrium, and potentially saves the figure.
         
         Parameters
@@ -468,6 +468,8 @@ class ode_lotka:
             determines if the figure should be saved to files
         filename : string, default='microbiota_density'
             the filename if the figure is saved
+        ylim : list, default=None
+            sets the y-limits for the plot, if given
         drt_colours : list, default=['magenta', 'b', 'black']
             colours to use to plot the donor, recipient, and transconjugant (distinct from rest of colour cycle)
         cmap : colourmap, default='Spectral'
@@ -480,6 +482,7 @@ class ode_lotka:
                  label=['Donor', 'Recipient', 'Transconjugants'] + [f'Species {i+1}' for i in range(self.n_species-3)])
         ax.set_xlabel('Time')
         ax.set_ylabel('Population Density')
+        if ylim != None: plt.ylim(ylim)
         plt.legend()
         plt.title(title, fontweight='bold')
         plt.tight_layout()
