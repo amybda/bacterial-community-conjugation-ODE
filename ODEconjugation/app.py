@@ -128,7 +128,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 ui.markdown("""
                 ## **Determining Species Number**
                 The model is initialised for a run using `ode_lotka(n_species)`. The parameter `n_species` is used to determine the number of species in the community, excluding the donor, recipient and transconjugants. Therefore, a value of `n_species = 1` would have 4 species total. The number of species determines how many linked ODE equations need to be solved, with the number of entries in $\\mathbf{x}(t)$ and the size of the interaction matrix.<br><br>
-                In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effects of receiving resistance genes.<br><br>
+                In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effect of receiving resistance genes via conjugative plasmids.<br><br>
                 The starting species density `x0` is a parameter entered as an array with `3 + n_species` entries. Species (including donor and recipient when 'spiked in') are likely to not remain at the starting density, as the system will always try to tend to equilibrium based on the ODEs. This may not reflect real experimental behaviour, where species remain in stationary phase at the OD they are introduced. In this model, you can run an equilibrium step - to let the community find equilibrium without any drug perturbations or pathogens, or start the 'main simulation' right away without finding equilibrium.
                 <br><br>
                 #### The Crowding Effect
@@ -139,9 +139,9 @@ with ui.navset_card_pill(id="main_tabs"):
                 * $d$ is the density-dependent factor, given as $0.01$
                 * note that $0 < m_0 + d \\geq 1$
                 * $\\delta$ is the strentgh of the effect of the population density, given as $1$<br><br>
-                The crowding effect strongly inhibits the growth of species in the population if the population densities are too high, with a stronger and more consistent effect that simply using interaction strengths. The model allows you to turn this effect off, which you can do in the overall `Run Model` tab, but is generally kept on to more closely follow real-world effects.
+                The crowding effect inhibits the growth of species in the population if the population densities are very high, another factor providing inhibition to population growth in addition to negative interactions between species. This can more closely mimic community growth in a closed system, to further limit carrying capacity. The model allows you to turn this effect off, which you can do in the overall `Run Model` tab, but is generally kept on to more closely follow real-world effects.
                 <br><br>
-                Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as they other species supress the growth of the donor and recipient, as any conjugation that may occur.
+                Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as the other species suppress the growth of the donor and recipient, decreasing the chances that conjugation may occur.
                 <hr>""")
                 @render_plotly(width='100%')
                 def nspecies_trans():
@@ -315,7 +315,7 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.nav_panel("Building the Interaction Matrix"):
                 ui.markdown("""
                 #### <b>Building the Interaction Matrix</b>
-                To build the interaction matrix alpha, $\\alpha_{ij}$, we used some parameters to then determine how the matrix was randomly populated. The matrix can be completely randomly populated based on the parameters using the `randomise_interaction_matrix(*parameters)` function.
+                To build the interaction matrix alpha, $\\alpha_{ij}$, we used parameters to determine how the matrix was randomly populated. The matrix can be completely randomly populated based on the parameters using the `randomise_interaction_matrix(*parameters)` function.
                 <br><br>
                 The matrix can also be entered manually using two different functions. `enter_custom_interaction_matrix(*parameters)` will make some corrections, such as ensuring the transconjugants have the same parameters as the recipients, ensuring the diagonal has the same self-inhibition rates as entered, and will calculate the growth rate and stability from the values entered. There is also `set_interaction_matrix(alpha, intrinsic_growth)` function which lets you set the interaction matrix and growth rate from entered values and automatically assumes the values are good. This web app will not interact with either of those functions, as that can lead to an unsolvable ODE equation. If you want to be able to play with these functions, please download the files from the GitHub and run in your desired Python environment.
                 <br><br>
@@ -329,7 +329,8 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.markdown("""
                         $C\\in[0,1]$ `connectivity`: the connectivity between different species in the community, the fraction of all `n_species` species that a single species interacts with 
                         - this is set to $0$ if there is no interaction for different species
-                        - if there is an interaction between them, the value of $\\alpha_{ij}$ is assigned to a proportion of entries equal to $C$
+                        - if there is an interaction between them, a proportion of entries equal to $C$ in $\\alpha_{ij}$ are given values not equal to $0$<br><br>
+                        Below, a lower connectivity means all species can grow to saturation. While that includes the donor and recipient, the high population densities of other species in the community prevents contact from occuring between the donor and recipient that is necessary for conjugation to occur. 
                         """)
                         @render_plotly(width='100%')
                         def connectivity_trans():
@@ -370,7 +371,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.markdown("""
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.04
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.15
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -399,14 +400,14 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Set up parameters
                             global change_conn, change_conn_alpha_init, change_conn_r_init
-                            params_x0 = [5e-5, 5e-5, 0] + [1] * 26
-                            params_susceptibility = np.zeros(29)
+                            params_x0 = [5e-5, 5e-5, 0] + [1] * 5
+                            params_susceptibility = np.zeros(5)
                             # Run model
-                            change_conn = ode_lotka(n_species=26)  # initialise model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn = ode_lotka(n_species=5)  # initialise model
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn_alpha_init = change_conn_alpha.get()
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn_r_init = change_conn_r.get()
                             change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
@@ -415,18 +416,18 @@ with ui.navset_card_pill(id="main_tabs"):
                         @reactive.event(input.connectivity_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [5e-5, 5e-5, 0] + [1] * 26
-                            params_susceptibility = np.zeros(29)
+                            params_x0 = [5e-5, 5e-5, 0] + [1] * 5
+                            params_susceptibility = np.zeros(5)
                             # Run model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Plot
                         @render_plotly(width='100%')
                         def plot_change_conn():
-                            return plot_species_densities(change_conn_results.get().t, change_conn_results.get().y, 26)
+                            return plot_species_densities(change_conn_results.get().t, change_conn_results.get().y, 5)
 
                     # Self Inhibition and Interaction Strength
                     with ui.accordion_panel('Self Inhibition & Interaction Strength'):
