@@ -373,16 +373,16 @@ class ode_lotka:
              time the drug should be removed from the simulation, typically still acting on community until the end"""
         # Do not run simulation if there are problems with lengths of input lists - make errors clearer
         if (len(susceptibility) != self.n_species) & (len(x0) != self.n_species):
-            raise IndexError(f'Your number of species is {len(self.n_species)} + donor, recipient and transconjugant.\
+            raise IndexError(f'Your number of species is {self.n_species-3} + donor, recipient and transconjugant.\
                              \nThe length of your susceptibility list is {len(susceptibility)}.\
                              \nThe length of your initial density list is {len(x0)}.\
                              \nPlease make the lengths of both these lists equal to the number of species.')
         elif (len(susceptibility) != self.n_species):
-            raise IndexError(f'Your number of species is {len(self.n_species)} + donor, recipient and transconjugant.\
+            raise IndexError(f'Your number of species is {self.n_species-3} + donor, recipient and transconjugant.\
                              \nThe length of your susceptibility list is {len(susceptibility)}.\
                              \nPlease make the lengths of this list equal to the number of species.')
         elif (len(x0) != self.n_species):
-            raise IndexError(f'Your number of species is {len(self.n_species)} + donor, recipient and transconjugant.\
+            raise IndexError(f'Your number of species is {self.n_species-3} + donor, recipient and transconjugant.\
                              \nThe length of your initial density list is {len(x0)}.\
                              \nPlease make the lengths of this lists equal to the number of species.')
         elif self.good_alpha != 1: 
