@@ -93,29 +93,29 @@ with ui.navset_card_pill(id="main_tabs"):
     with ui.nav_panel("Introduction"):
         ui.markdown("""
             # **Overview**
-            The experiment we are working on is to determining the effect of various drugs on the gut microbiome, which then may enable or prevent the spread of antibiotic resistance genes \\(ARGs). The current theory is that if drugs such as antibiotics successfully peturb the microbiome, if the donor and recipient are resistant, they can overgrow, increasing the odds they would come in contact with each other, allowing conjugation to occur. We also want to understand the influence of spatial structure within the gut - where different species are localised in the gut microbiome - on this phenomenon. While we are currently conducting *in vitro* and *in vivo* experiments, we would also like to develop a model which explores the dynamics of this.
+            The experiment we are working on is to determine the effect of various drugs on the gut microbiome, which then may enable or prevent the spread of antibiotic resistance genes \\(ARGs). The current theory is that if drugs such as antibiotics successfully peturb the microbiome, if the donor and recipient are resistant, they can overgrow, increasing the odds they would come in contact with each other, allowing conjugation to occur. We also want to understand the influence of spatial structure within the gut - where different species are localised in the gut microbiome - on this phenomenon. While we are currently conducting *in vitro* and *in vivo* experiments, we would also like to develop a model which explores the dynamics of this.
             <br><br>
             There are multiple different modelling approaches for studying the microbiome ([Kumar, 2019](https://www.nature.com/articles/s41564-019-0491-9#Sec11)). The two most relevant methods are ordinary differential equation (ODE)-based modelling, and agent-based modelling (ABM). Here we will focus on ODE-based modelling. ODE-based modelling has been used to model monocultures or simple co-culture systems (minimal species), using rate equations to measure the change in different variables in time - such as species growth or plasmid transfer. The rate equations can be used to create mass balances (a set of ODEs that can be solved using standard computational solvers). These ODEs allow the simulation of dynamic interactions between species, but they often have to be simplified to reduce the number of variables and parameters.
             <br><hr>
             ### [Generalised Lotka-Volterra, gLV (1987)](https://stefanoallesina.github.io/ICTS_2025/ch1.html)
-            LV models are widely used to describe the time evolution of ecosystems, often in a classical predator-prey LV model (where two competing populations directly affect each other's growth, either positively or negatively) ([Succurro, 2018](https://pmc.ncbi.nlm.nih.gov/articles/PMC5906705/#s2)). Model parameters, including intitial conditions, quantify direct interactions to determine the stability of the system and can be numerically solved. [Stein *et al.* (2013)](https://pmc.ncbi.nlm.nih.gov/articles/PMC3861043/#s4) implemented an expansion of the gLV model, which includes a term to model susceptibility, $\\epsilon_{i}$, to an external perturbation such as a drug $p(t)$.
+            LV models are widely used to describe the time evolution of ecosystems, often in a classical predator-prey LV model (where two competing populations directly affect each other's growth, either positively or negatively) ([Succurro, 2018](https://pmc.ncbi.nlm.nih.gov/articles/PMC5906705/#s2)). Model parameters, including initial conditions, quantify direct interactions to determine the stability of the system and can be numerically solved. [Gavina *et al.* (2019)](https://www.nature.com/articles/s41598-017-19044-9) incorporated the crowding effect $m$ into a LV model, to add an addition term to further reduce growth in populations with high density, which can better account for bacterial growth in a closed system. [Stein *et al.* (2013)](https://pmc.ncbi.nlm.nih.gov/articles/PMC3861043/#s4) implemented an expansion of the gLV model, which includes a term to model susceptibility, $\\epsilon$, to an external perturbation such as a drug $p(t)$.
             <br><br>
             To construct this programme, I used code from Laura de Nies (Stracy Lab), in combination with information from Coyte's papers:
             * [The ecology of the microbiome: Networks, competition, and stability (2015)](https://www.science.org/doi/full/10.1126/science.aad2602#abstract)
             * [Horizontal gene transfer and ecological interactions jointly control microbiome stability (2022)](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3001847#sec008)
             <br><br>
-            The equation used here to model growth is: $$\\frac{dx_i(t)}{dt} = x_i(t) \\left(r_i \\sum_j \\alpha_{ij}x_j(t) + \\epsilon_i p(t) - m_i \\right) + \\gamma$$ where:<br><br>
-            * $\\frac{dx_i(t)}{dt}$ is the change in community density
-            * $x(t)$ is a vector containing the densities of all the populations $1,...,n$ at time $t$
-            * $r$ is a vector of the growth rates (or death rates when negative) measuring the growth/decline of population $i$ when growing alone at low density
-            * $\\alpha$ is an $n \\times n$ matrix of interaction coefficients, with self-inhibition (or growth) vector $s_i(x)$ as the diagonal matrix
-            * $\\epsilon$ is the susceptibility of a species to the perturbation (in this case the drug)
-            * $p$ is the overall strength of the perturbation introduced
+            The equation used here to model growth is: $$\\frac{dx_i(t)}{dt} = x_i(t) \\left(r_i \\sum_j \\alpha_{ij}x_j(t) - m_i + \\epsilon_i p(t) \\right) + \\gamma$$ where:<br><br>
+            * $\\frac{dx_i(t)}{dt}$ is the change in population density for species $i$ between time $t$ and $t+1$
+            * $x_i(t)$ is the population density of species $i$ at time $t$
+            * $r_i$ is a vector of the growth rates (or death rates when negative) measuring the growth/decline of population $i$ when growing alone at low density
+            * $\\mathbf{\\alpha}$ is an $n \\times n$ matrix of interaction coefficients, with self-inhibition (or growth) vector $\\mathbf{s}(x)$ as the diagonal matrix
             * $m_i$ is the crowding effect rate for species $i$
+            * $\\epsilon_i$ is the susceptibility of species $i$ to the perturbation (in this case the antibiotic)
+            * $p$ is the overall strength of the perturbation introduced
             * $\\gamma$ is the term considering plasmid transfer, and how that affects the population (ie. changing some cells from recipients to transconjugants)
             <br><hr>
             ### <u>This Programme</u>
-            The goal of this programme is to allow users to interactively explore the effect of adjusting different parameters in the Lotka-Volterra model on the number of transconjugants formed. Vist the `Explore Parameters` tab to identify the impact of each parameter on the model. Check out the `Run Model` tab to run a model complete with all your own parameters. You can also see simulations that mimic experimental conditions on the `Experimental Conditions` tab.<br><br>""")
+            The goal of this programme is to allow users to interactively explore the effect of adjusting different parameters in the Lotka-Volterra model on the number of transconjugants formed. Vist the `Explore Parameters` tab to discover what parameters make up the model and identify their impact on the number of transconjugants formed. Check out the `Run Model` tab to run a simulation with all your own parameters. You can also see simulations that mimic experimental conditions on the `Experimental Conditions` tab.<br><br>""")
 
 
     # PARAMETER PANELS
@@ -127,8 +127,8 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.nav_panel("Modifying Species"):
                 ui.markdown("""
                 ## **Determining Species Number**
-                The model is initialised for a run using `ode_lotka(n_species)`. The parameter `n_species` is used to determine the number of species in the community, excluding the donor, recipient and transconjugants. Therefore, a value of `n_species = 1` would have 4 species total. The number of species determines how many linked ODE equations need to be solved, with the number of entries in $x(t)$ and the size of the interaction matrix.<br><br>
-                In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effects of receiving resistance genes.<br><br>
+                The model is initialised for a run using `ode_lotka(n_species)`. The parameter `n_species` is used to determine the number of species in the community, excluding the donor, recipient and transconjugants. Therefore, a value of `n_species = 1` would have 4 species total. The number of species determines how many linked ODE equations need to be solved, with the number of entries in $\\mathbf{x}(t)$ and the size of the interaction matrix.<br><br>
+                In this model, the recipient species and the transconjugant species are treated as the same - namely, they have the same interactions with other species. As a default, the donor is also the same species as the recipient and transconjugant, with the same interactions as both. However, there is an option to set the donor and recipient to be different species with different interactions. Either way, the donor, recipient and transconjugants can have different suceptibilities to the drug to model the effect of receiving resistance genes via conjugative plasmids.<br><br>
                 The starting species density `x0` is a parameter entered as an array with `3 + n_species` entries. Species (including donor and recipient when 'spiked in') are likely to not remain at the starting density, as the system will always try to tend to equilibrium based on the ODEs. This may not reflect real experimental behaviour, where species remain in stationary phase at the OD they are introduced. In this model, you can run an equilibrium step - to let the community find equilibrium without any drug perturbations or pathogens, or start the 'main simulation' right away without finding equilibrium.
                 <br><br>
                 #### The Crowding Effect
@@ -139,9 +139,9 @@ with ui.navset_card_pill(id="main_tabs"):
                 * $d$ is the density-dependent factor, given as $0.01$
                 * note that $0 < m_0 + d \\geq 1$
                 * $\\delta$ is the strentgh of the effect of the population density, given as $1$<br><br>
-                The crowding effect strongly inhibits the growth of species in the population if the population densities are too high, with a stronger and more consistent effect that simply using interaction strengths. The model allows you to turn this effect off, which you can do in the overall `Run Model` tab, but is generally kept on to more closely follow real-world effects.
+                The crowding effect inhibits the growth of species in the population if the population densities are very high, another factor providing inhibition to population growth in addition to negative interactions between species. This can more closely mimic community growth in a closed system, to further limit carrying capacity. The model allows you to turn this effect off, which you can do in the overall `Run Model` tab, but is generally kept on to more closely follow real-world effects.
                 <br><br>
-                Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as they other species supress the growth of the donor and recipient, as any conjugation that may occur.
+                Below, as the number of species in an unperturbed community increases, the number of transconjugants decreases as the other species suppress the growth of the donor and recipient, decreasing the chances that conjugation may occur.
                 <hr>""")
                 @render_plotly(width='100%')
                 def nspecies_trans():
@@ -315,7 +315,7 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.nav_panel("Building the Interaction Matrix"):
                 ui.markdown("""
                 #### <b>Building the Interaction Matrix</b>
-                To build the interaction matrix alpha, $\\alpha_{ij}$, we used some parameters to then determine how the matrix was randomly populated. The matrix can be completely randomly populated based on the parameters using the `randomise_interaction_matrix(*parameters)` function.
+                To build the interaction matrix alpha, $\\alpha_{ij}$, we used parameters to determine how the matrix was randomly populated. The matrix can be completely randomly populated based on the parameters using the `randomise_interaction_matrix(*parameters)` function.
                 <br><br>
                 The matrix can also be entered manually using two different functions. `enter_custom_interaction_matrix(*parameters)` will make some corrections, such as ensuring the transconjugants have the same parameters as the recipients, ensuring the diagonal has the same self-inhibition rates as entered, and will calculate the growth rate and stability from the values entered. There is also `set_interaction_matrix(alpha, intrinsic_growth)` function which lets you set the interaction matrix and growth rate from entered values and automatically assumes the values are good. This web app will not interact with either of those functions, as that can lead to an unsolvable ODE equation. If you want to be able to play with these functions, please download the files from the GitHub and run in your desired Python environment.
                 <br><br>
@@ -329,7 +329,8 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.markdown("""
                         $C\\in[0,1]$ `connectivity`: the connectivity between different species in the community, the fraction of all `n_species` species that a single species interacts with 
                         - this is set to $0$ if there is no interaction for different species
-                        - if there is an interaction between them, the value of $\\alpha_{ij}$ is assigned to a proportion of entries equal to $C$
+                        - if there is an interaction between them, a proportion of entries equal to $C$ in $\\alpha_{ij}$ are given values not equal to $0$<br><br>
+                        Below, a lower connectivity means all species can grow to saturation. While that includes the donor and recipient, the high population densities of other species in the community prevents contact from occuring between the donor and recipient that is necessary for conjugation to occur. 
                         """)
                         @render_plotly(width='100%')
                         def connectivity_trans():
@@ -370,7 +371,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.markdown("""
                                         ##### Parameters
                                         <u>Parameters for the interaction matrix</u>
-                                        - `sigma` (interspecies interaction strength standard deviation): 0.04
+                                        - `sigma` (interspecies interaction strength standard deviation): 0.15
                                         - `P_m` (proportion of species reactions that are positive): 0
                                         - `self_inhibition` (intra-specific interaction strength): 0.1
                                         - `intrinsic_growth` (instrinsic growth rate): 1""")
@@ -399,14 +400,14 @@ with ui.navset_card_pill(id="main_tabs"):
                         def _():
                             # Set up parameters
                             global change_conn, change_conn_alpha_init, change_conn_r_init
-                            params_x0 = [5e-5, 5e-5, 0] + [1] * 26
-                            params_susceptibility = np.zeros(29)
+                            params_x0 = [5e-5, 5e-5, 0] + [1] * 5
+                            params_susceptibility = np.zeros(8)
                             # Run model
-                            change_conn = ode_lotka(n_species=26)  # initialise model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn = ode_lotka(n_species=5)  # initialise model
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn_alpha_init = change_conn_alpha.get()
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn_r_init = change_conn_r.get()
                             change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
@@ -415,18 +416,18 @@ with ui.navset_card_pill(id="main_tabs"):
                         @reactive.event(input.connectivity_new_alpha)
                         def _():
                             # Determine strength of interactions - needs lower interactions with more species to solve matrix
-                            params_x0 = [5e-5, 5e-5, 0] + [1] * 26
-                            params_susceptibility = np.zeros(29)
+                            params_x0 = [5e-5, 5e-5, 0] + [1] * 5
+                            params_susceptibility = np.zeros(8)
                             # Run model
-                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.04, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
-                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
-                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(26)]) )
+                            change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
+                            change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
+                            change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Plot
                         @render_plotly(width='100%')
                         def plot_change_conn():
-                            return plot_species_densities(change_conn_results.get().t, change_conn_results.get().y, 26)
+                            return plot_species_densities(change_conn_results.get().t, change_conn_results.get().y, 5)
 
                     # Self Inhibition and Interaction Strength
                     with ui.accordion_panel('Self Inhibition & Interaction Strength'):
@@ -434,8 +435,8 @@ with ui.navset_card_pill(id="main_tabs"):
                         $\\sigma$ `sigma`: the standard deviation of the normal distribution that the strength of the interactions between species is drawn from
                         - the actual value of $\\alpha_{ij}$ given a value between -1 and +1 <br>
 
-                        $s_i$ `self_inhibition`: a vector of the self inhibition rate, or effect of a species on itself (we assume each species competes to the same extent with members of their own species)
-                        - diagonal entries in the interaction matrix will be set to have the value $−s_i$ <br>
+                        $s_i$ `self_inhibition`: the self inhibition rate of species $i$, or effect of a species on itself (we assume each species competes to the same extent with members of their own species)
+                        - diagonal entries in the interaction matrix will be set to have the value $−\\mathbf{s}$ <br>
 
                         donors, recipients, and transconjugant parameters
                         - between the recipients and transconjugants (and typically the donor), the interaction strength will be set to be the same for all entries
@@ -506,7 +507,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
-                                ui.markdown("""This example simulation lets you play around with different strengths of interaction (drawn from a normal distribution with standard deviation $\\sigma$) between two community species and the donor/recipients, as well as the self-inhibition values, $s_i$, of all species. $s_i$ values on the diagonals of the matrix must be stronger negative interactions than those between other species for the ODE to be solvable. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
+                                ui.markdown("""This example simulation lets you play around with different strengths of interaction (drawn from a normal distribution with standard deviation $\\sigma$) between two community species and the donor/recipients, as well as the self-inhibition values, $\\mathbf{s}$, of all species. $s_i$ values on the diagonals of the matrix must be stronger negative interactions than those between other species for the ODE to be solvable. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
@@ -665,7 +666,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         Once the interaction matrix and species self-interaction is defined, we can then identify the species growth rate, $r_i$:
                         - we assume the community has a linearly asymptotically stable equilibrium at $x_i \\approx \\text{intrinsic growth} \\in i$, where the default value `instrinsic_growth = 1` $\\pm$ some random noise
                         - intrinsic growth can also be an array provided with `3 + n_species`, so that each community species has their own growth rate
-                        - the array `steady_state` is the length of the `3 + n_species` is made, with each of the values being around `intrinsic_growth`, with some random noise around the value
+                        - the array `steady_state` is the length of the `3 + n_species`, with each of the values being around `intrinsic_growth`, with some random noise around the value
                         - note that even if different intrinsic growth rates are provided for donor/recipient/transconjugant species, as they have the same interaction matrix parameters, they will have the same calculated $r$ values
                         - $r$ is then found by a matrix multiplication of $\\alpha$ and `steady_state`
                         - this introduces a trade-off in growth strategies, with species investing either in their own intrinsic growth rate or growth via cooperation with others, reducing unrealistic explosive behavior in highly cooperative communities""")
@@ -764,7 +765,7 @@ with ui.navset_card_pill(id="main_tabs"):
             with ui.nav_panel("Modelling Conjugation"):
                 ui.markdown("""
                 #### <b>Modelling Conjugation</b>
-                The donor and recipient are inoculated at `t_dr`, which can be any time later than `t = 0`. Both when running with an equilibrium step and when running without one and `t < t_dr`; the donor, recipient and transconjugant values are set to 0. During this time, the `plasmid_transfer` term $\\gamma=0$ also ensures that no conjugation occurs. Afterwards, when `t > t_dr`, the population density for the community calculated by the ODE solver is carried forward, but the donor and recipient values are taken from the `x0` value inputted by the user.""")
+                The donor and recipient are inoculated at `t_dr`, which can be any time later than `t = 0`. Both when running with an equilibrium step and when running without one and `t < t_dr`; the donor, recipient and transconjugant values are set to $0$. During this time, the `plasmid_transfer` term $\\gamma=0$ also ensures that no conjugation occurs. Afterwards, when `t > t_dr`, the population density for the community calculated by the ODE solver is carried forward, but the donor and recipient values are taken from the `x0` value inputted by the user.""")
                 with ui.layout_columns(col_widths=[5, 7]):
                     with ui.layout_columns(col_widths=[12, 12]):
                         with ui.card():
@@ -804,7 +805,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                 - `x0` (initial community densities): 1
                                 - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
-                        ui.markdown("""This example simulation lets you play around with different introduction and removal times of the drug into the community. This allows you to see perturbation as well as recovery if desired. If `t_drug = 0`, then the drug is entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_drug = 100`).  If `t_drug_removal = 100`, then the drug is not removed from the community at all and remains for the whole simulation run. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix generated for this run.""")
+                        ui.markdown("""This example simulation lets you play around with different introduction times of the donor and recipient into the community. If `t_dr = 0`, then the donor and recipient are entered in the community from the start, otherwise it is entered at the time provided, (or not at all if `t_dr = 100`). Click the more info icon to see more information about the model, including the interaction matrix generated for this run.""")
                 # Run model
                 @reactive.effect
                 def _():
@@ -844,7 +845,7 @@ with ui.navset_card_pill(id="main_tabs"):
                 #### Simple Conjugation
                 The `simple` method takes `conjugation_rate` $\\Gamma$ and determines the plasmid_transfer rate: 
                 $$\\gamma=x_\\text{recipients}[\\Gamma(x_\\text{donors}+x_\\text{transconjugants})]$$
-                This therefore takes into account the number of donor and transconjugants that can donate the plasmid, and the number of transconjugants that could recieve it - accounting for physical number and potential spatial limitations of coming into contact and donating the plasmid. <br><br>
+                This therefore takes into account the number of donor and transconjugants that can donate the plasmid, and the number of recipients that could recieve it - accounting for physical number of donors which may limit the probability of coming into contact and donating the plasmid.<br><br>
                 This graph compares the final transconjugant population density with varied conjugation rate.""")
                 @render_plotly(width='100%')
                 def simple_conj_trans():
@@ -868,10 +869,10 @@ with ui.navset_card_pill(id="main_tabs"):
                     return fig
                 ui.markdown("""
                 #### Spatial Competition on Conjugation
-                The second method `proportion` also takes into account any other species in the community, and any spatial inhibition they may provide to conjugation. Even if species don't have any interaction via the interaction matrix, there should be an effect on conjugation rate due to the competition for space, and the limited ability for the donor to physically contact the recipient. The method takes `conjugation_rate` $\\Gamma$ and determines the `plasmid_transfer` rate:
+                The second, and default method `proportion` also takes into account any other species in the community, and any spatial inhibition they may provide to conjugation. Even if species don't have any interaction via the interaction matrix, there should be an effect on conjugation rate due to the competition for space, and the limited ability for the donor to physically contact the recipient. The method takes `conjugation_rate` $\\Gamma$ and determines the `plasmid_transfer` rate:
                 $$\\gamma=x_\\text{recipients}[\\Gamma(x_\\text{donors}+x_\\text{transconjugants})]\\times\\rho\\times\\frac{1}{\\lambda}$$
                 where $\\rho = \\text{prop}\\_\\text{donor + transconjugant} \\times \\text{prop}\\_\\text{recipient}$<br><br>
-                This method takes the simple `plasmid_transfer` rate and multiplies it by the proportion of cells in the population that can donate the plasmid and the proportion of cells in the population that can receive the plasmid. Therefore, the more cells there are the community, the lower the proportion of donors and recipients, and the less likely there are to come into contact with each other to allow conjugation to occur, even if there are high numbers of donor and recipient cells. This is similar to the crowding effect, this time implemented to influence plasmid transfer. This method is modulated by `prop_strength` $\\lambda\\in[0,1]$. The user entered value is then rescaled to the range $\\lambda\\in[\\rho,1]$ to prevent a divide by 0 error and take into account the strength of the effect.""")
+                This method takes the simple `plasmid_transfer` rate and multiplies it by the proportion of cells in the population that can donate the plasmid and the proportion of cells in the population that can receive the plasmid. Therefore, the more cells there are the community, the lower the proportion of donors and recipients, and the less likely they are to come into contact with each other for conjugation, even if there are high numbers of donor and recipient cells. This is similar to the crowding effect, implemented to influence plasmid transfer. This method is modulated by `prop_strength` $\\lambda\\in[0,1]$. The user entered value is then rescaled to the range $\\lambda\\in[\\rho,1]$ to prevent a divide by 0 error and take into account the strength of the effect.""")
                 @render_plotly(width='100%')
                 def spatial_conj_trans():
                     x = np.logspace(-6, -1, 501, base=10)*5
@@ -957,7 +958,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial donor/recipient densities): $5\\times 10^{-5}$ (no transconjugants to start)
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$""")
-                                ui.markdown("""This example simulation lets you play around with the parameters that inhibit conjugation, to identify the contributions of competitive interactions (values determined by $\\sigma$) vs spatial inhibition (given by $\\rho$) and the number of transconjugants formed. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
+                                ui.markdown("""This example simulation lets you play around with the parameters that inhibit conjugation, to identify the contributions of competitive interactions (values determined by $\\sigma$) vs spatial inhibition (given by $\\rho$) on the number of transconjugants formed. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
@@ -998,7 +999,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     with ui.layout_columns(col_widths=[12]):
                         with ui.card():
                             ui.input_numeric(id='params_simple_conj', label='Input Conjugation Rate', value=5e-4, min=5e-10, max=5, width='100%')
-                            ui.input_slider(id='params_spatial_conj', label='Input Strength of Spatial Inhibition', value=0, min=0, max=1, step=0.01, width='100%')
+                            ui.input_slider(id='params_spatial_conj', label='Input Strength of Spatial Inhibition', value=0.1, min=0, max=1, step=0.01, width='100%')
                             ui.input_action_button(id='conj_new_alpha', label='Randomise a new interaction matrix')
                         # Transconjugant final numbers
                         with ui.value_box(showcase=icon('bacteria'), theme="purple"):
@@ -1175,7 +1176,7 @@ with ui.navset_card_pill(id="main_tabs"):
 
                     # Drug Strength
                     with ui.accordion_panel('Drug Strength'):
-                        ui.markdown("""The drug strength $p$ is given as a proportion on a scale of $0$ to $1$ to be able to modulate the strength of the perturbation. When the community is much more susceptible to the drug than the donor, recipient, and transconjugant, the drug can perturb the surrounding community, allowing the donor and recipient to overgrow and conjugation to occur.""")
+                        ui.markdown("""The drug strength $p$ is given as a proportion on a scale of $0$ to $1$ to be able to modulate the strength of the perturbation. In the graph below, when the community is much more susceptible to the drug than the donor, recipient, and transconjugant, the drug can perturb the surrounding community, allowing the donor and recipient to overgrow and conjugation to occur. However, too high a drug concentration can affect the donor and recipient's growth, even if the have very low susceptibilities to it.""")
                         @render_plotly(width='100%')
                         def drug_strength_trans():
                             x = np.linspace(0, 1, 101)
@@ -1369,7 +1370,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         - `x0` (initial community densities): 1
                                         - `conjugation_rate` (average plasmid conjugation rate): $5\\times 10^{-4}$
                                         - `drug_strength`: 0.7""")
-                                ui.markdown("""This example simulation lets you play around with different donor, recipient, transconjugant and community susceptibilities, $\\epsilon$, as a scale between 0 and 1. The higher the drug susceptibility, the stronger an effect it will have on the bacterial species. While in the example, the transconjugants takes from either the donor or recipient susceptibilities, it can have a new susceptibility entirely - ie. gaining the plasmid gives an improved resistance compared to the donor and recipient. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
+                                ui.markdown("""This example simulation lets you play around with different donor, recipient, transconjugant and community susceptibilities, $\\epsilon$, as a scale between 0 and 1. The higher the drug susceptibility, the stronger an effect it will have on the bacterial species. While in the example, the transconjugants take from either the donor or recipient susceptibilities, it can have a new susceptibility entirely - ie. gaining the plasmid gives an improved resistance compared to the donor and recipient. In this example, the community is allowed to find equilibrium before the donor and recipient are introduced (not plotted). Click the more info icon to see more information about the model, including the interaction matrix and growth rates generated for this run. The parameters used to run this interactive model are the same used to generate the graph above.""")
                         # Run model
                         @reactive.effect
                         def _():
@@ -1411,7 +1412,7 @@ with ui.navset_card_pill(id="main_tabs"):
         # Markdown
         ui.markdown("""
         ## **Running the Model**
-        Once the parameters of the model to set things up as described, and the interaction matrix and growth rates have been calculated, the system of ODEs can be solved. The `scipy` function `solve_ivp()` is used from `t_start < t < t_end` to solve the system of equations:
+        Once the parameters of the model have been set up, and the interaction matrix and growth rates have been calculated, the system of ODEs can be solved. The `scipy` function `solve_ivp()` is used from `t_start < t < t_end` to solve the system of equations:
         $$ \\begin{bmatrix} dDdt \\\\\ dRdt \\\\\ dTdt \\\\\ dC_1dt \\\\\ ... \\end{bmatrix} =
         \\begin{bmatrix} dX_Ddt \\\\\ dX_Rdt \\\\\ dX_Tdt \\\\\ dX_{C_1}dt \\\\\ ... \\end{bmatrix} -
         \\begin{bmatrix} X_Dm_D \\\\\ X_Rm_R \\\\\ X_Tm_T \\\\\ X_{C_1}m_{C_1} \\\\\ ... \\end{bmatrix} -
@@ -1921,8 +1922,8 @@ with ui.navset_card_pill(id="main_tabs"):
                     with ui.nav_panel("Establishing CR"):
                         ui.markdown("""
                         ### Establishing Colonisation Resistance in a Simple Community
-                        Let's start with a model with 1 commensal species, which will be used to represent the gut community. The model will be run 100 times to generate different interaction matrices, and determine the overall behaviour with the given conditions.<br><br>
-                        In a model where this commensal species does not interact with the donor, recpient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.
+                        Let's start with a model with 1 commensal species, which will be used to represent the gut community. The simulation will be run 100 times to generate different interaction matrices, and determine the overall behaviour with the given conditions.<br><br>
+                        In a model where this commensal species does not interact with the donor, recipient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.
                         <br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_no_cr():
@@ -1933,12 +1934,12 @@ with ui.navset_card_pill(id="main_tabs"):
                         def plot_cr():
                             cr_trans = np.load(f'{data_dir}/exp_cr_trans.npy')
                             return plot_species_densities(np.arange(0,101), cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Colonisation Resistance Over 100 Runs<b>')
-                        ui.markdown("""<br>However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.7$ and susceptibility, $\\epsilon=1$), compared to a resistant donor, recipient and transconjugant ($\\epsilon=0.05$), colonisation resistance is removed. Meanwhile, the donor and recipient strains are able to grow much more effectively and transconjugants can form.<br><br>""")
+                        ui.markdown("""<br>However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.5$ and susceptibility, $\\epsilon=1$), compared to a resistant donor, recipient and transconjugant ($\\epsilon=0.05$), colonisation resistance is removed. The antibiotic strongly negatively affects the growth of the commensal species, while the donor and recipient strains are able to grow much more effectively and conjugation can occur.<br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_cr_perturb():
                             cr_perturb = np.load(f'{data_dir}/exp_cr_perturb.npy')
                             return plot_species_densities(np.arange(0,101), cr_perturb.mean(axis=0), 1, title='<b>Average Population Density When Removing CR with Antibiotics Over 100 Runs<b>')
-                        ui.markdown("""<br>You can see the difference between the final donor, recipient, and transconjugant densities under these three conditions. The donor and recipient grow to a much higher density without colonisation resistance, and a higher density of transconjugants forms than when there is colonisation resistance. However, with the antibiotics that perturb the community, the donor and recipient grow again, though not to the same densities as before. However, this allows more transconjugants to form.<br><br>""")
+                        ui.markdown("""<br>You can see the difference between the final donor, recipient, and transconjugant densities under these three conditions. The donor and recipient grow to a much higher density without colonisation resistance than with it, and a higher density of transconjugants forms. However, with  antibiotics that perturb the community, the donor and recipient grow again. Additionally, as the population density of the perturbed commensal species is decreased, meaning there is less spatial inhibition for both growth and conjugation, and more transconjugants can form than in an unperturbed community, even without colonisation resistance.<br><br>""")
                         @render_plotly(width="100%", height='450px')
                         def cr_bar_plots():
                             no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
@@ -1964,7 +1965,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                             yaxis_title='Species Population Density',
                                             yaxis={'tickfont': {'size':18}})
                             return fig
-                        ui.markdown("""<br>Similarly, without colonisation resistance, the range of donor and recipient susceptibilities that transconjugants can grow is much greater. There is a narrower range of susceptibilities that transconjugants form with colonisation resistance. However, with a community susceptible to antibiotics, even when it is highly resistant to colonisation, it can be perturbed enough to allow transconjugants to form again at a wider range of donor and recipient susceptibilities.""")
+                        ui.markdown("""<br>Similarly, without colonisation resistance, the range of donor and recipient susceptibilities that transconjugants can grow is much greater. There is a narrower range of susceptibilities that transconjugants form with colonisation resistance. However, with a community susceptible to antibiotics, even when it is highly resistant to colonisation, it can be perturbed enough to allow transconjugants to form again at a wider range of donor and recipient susceptibilities. Additionally, higher densities of transconjugants form as there is a decreased overall community density compared to a community without connectivity or perturbation. This therefore reduces the spatial inhibition that prevents transconjugants from forming.""")
                         @render_plotly(width='100%', height='545px')
                         def sus_plot_no_cr():
                             x = np.linspace(0, 1, 21)
@@ -2005,7 +2006,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.markdown("""
                                     ### Scaling Up - A Two Species Community
                                     Now let's consider a model with 2 commensal species.<br><br>
-                                    Interactions between the commensal species are weak ($\\sigma=0.1$). Species A only interacts very weakly with the pathogens ($\\sigma=0.01$). Species B, however, has very strong interactions with the pathogens ($\\sigma=0.6$), and the pathogens in return have somewhat negative inhibition on Species B in return ($\\sigma=0.2$). Each species has two strains, strain a which is susceptible to antibiotics ($\\epsilon=0.8$) and strain b which is equally as resistant as the donor, recipient and transconjugant strains ($\\epsilon=0.05$). The model will be run 100 times to generate different interaction matrices, and determine the overall behaviour of the population what drug perturbation ($p=0.5$) is added to communities made of different combinations of resistant and susceptible species.
+                                    Interactions between the commensal species are weak ($\\sigma=0.1$). Species A only interacts very weakly with the pathogens ($\\sigma=0.01$). Species B, however, has very strong interactions with the pathogens ($\\sigma=0.6$), and the pathogens in return have somewhat negative inhibition on Species B in return ($\\sigma=0.2$). Each species has two strains, strain a which is susceptible to antibiotics ($\\epsilon=0.8$) and strain b which is equally as resistant as the donor, recipient and transconjugant strains ($\\epsilon=0.05$). The simulation will be run 100 times to generate different interaction matrices, and determine the overall behaviour of the population with drug perturbation ($p=0.5$) in communities made of different combinations of resistant and susceptible species.
                                     <br><br>""")
                         with ui.layout_columns(col_widths=[6, 6]):
                             with ui.card():
@@ -2027,7 +2028,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                         ui.toolbar_input_select(id="view_AbBa", label="View Mode", choices=["Graph", "Explanation"], show_label=True)
                                 @render.text
                                 def text_AbBa():
-                                    if input.view_AbBa()=='Explanation': return "Species A is resistant (Ab) and Species B is suceptible (Ba). Therefore, only Species Ba is strongly perturbed by the antibiotic. However, despite high densities of Species Ab remaining in the population, it has only very weak interactions with the donor and recipient, once again allowing them to grow to saturation and transconjugants to form. However, the spatial inhibition from another species in the population can prevent contact between donors and recipients, so slightly less transconjugants form than when both commensal species are susceptible."
+                                    if input.view_AbBa()=='Explanation': return "Species A is resistant (Ab) and Species B is suceptible (Ba). Therefore, only Species Ba is strongly perturbed by the antibiotic. Despite high densities of Species Ab remaining in the population, it has only very weak interactions with the donor and recipient, once again allowing them to grow to saturation and transconjugants to form. However, the spatial inhibition from another species in the population can prevent contact between donors and recipients, so slightly less transconjugants form than when both commensal species are susceptible."
                                 @render_plotly(width='100%')
                                 def plot_AbBa():
                                     species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')
@@ -2056,7 +2057,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 def plot_AbBb():
                                     species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')
                                     if input.view_AbBb()=='Graph': return plot_species_densities(np.arange(0,101), species2_model_trans[3].mean(axis=0), 2, title='<b><b>', orientation='h')
-                        ui.markdown("""<br>Each plot above is explained on the explanation tab. A summary of these results can be seen in the bar chart below. The donors and recipients grow best without any competition from Species A or B, when both are susceptible to antibiotics and are killed. Even when Species A is resistant, as it has weak interactions with the donor and recipient, it has little to no effect on the growth of the donors and recipients, though it can physically block the contact necessary for transconjugants to form. Conversley, with a resistant Species B, it has very strong interactions with the donor and recipient, as well as blocking contact between them, supressing the growth of transconjugants. Finally, with a resistant Species A and Species B, the strong negative interactions from Species B, as well as the physical competition from both commensal species blocking physical contact strongly supresses transconjugant growth.""")
+                        ui.markdown("""<br>Each plot above is explained on the explanation tab. A summary of these results can be seen in the bar chart below. The donors and recipients grow best without any competition from Species A or B, when both are susceptible to antibiotics and are killed. Even when Species A is resistant, as it has weak interactions with the donor and recipient, it has little to no effect on the growth of the donors and recipients, though it can physically block the contact necessary for transconjugants to form. Conversley, with a resistant Species B, it has very strong interactions with the donor and recipient, as well as blocking contact between them, supressing the growth of transconjugants. Finally, with a resistant Species A and Species B, the strong negative interactions from Species B, as well as the physical competition from both commensal species blocking physical contact strongly supresses transconjugant growth.<br>""")
                         @render_plotly(width="100%", height='450px')
                         def species2_bar_plots():
                             species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')

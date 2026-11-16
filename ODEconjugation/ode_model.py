@@ -81,10 +81,12 @@ class ode_lotka:
             if donor_equal_recipient:
                 alpha[0,1] = -self_inhibition  # recipients self-inhibit donors
                 alpha[0,2] = -self_inhibition  # transconjugants are recipients and also self-inhibit
-                alpha[1] = alpha[0]  # recipients = donors
+                alpha[1] = alpha[0]  # recipients have on other species = donors have on other species
+                alpha[:,1] = alpha[:,0]  # other species have on recipients = other species have on donors
             # Set the transconjugants to have the same interactions as the recipients (as the same bacteria)
             alpha[1,2] = -self_inhibition  # recipient interaction with transconjugants is the same as self-inhibition
-            alpha[2] = alpha[1]  # transconjugants = recipients
+            alpha[2] = alpha[1]  # transconjugants have on other species = recipients have on other species
+            alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
             # Finding r from self-inhibition
             steady_state = self.get_growth_rate(alpha, intrinsic_growth)
             # Calculate stability
@@ -371,16 +373,16 @@ class ode_lotka:
              time the drug should be removed from the simulation, typically still acting on community until the end"""
         # Do not run simulation if there are problems with lengths of input lists - make errors clearer
         if (len(susceptibility) != self.n_species) & (len(x0) != self.n_species):
-            raise IndexError(f'Your number of species is {len(self.n_species)} + donor, recipient and transconjugant.\
+            raise IndexError(f'Your number of species is {self.n_species-3} + donor, recipient and transconjugant.\
                              \nThe length of your susceptibility list is {len(susceptibility)}.\
                              \nThe length of your initial density list is {len(x0)}.\
                              \nPlease make the lengths of both these lists equal to the number of species.')
         elif (len(susceptibility) != self.n_species):
-            raise IndexError(f'Your number of species is {len(self.n_species)} + donor, recipient and transconjugant.\
+            raise IndexError(f'Your number of species is {self.n_species-3} + donor, recipient and transconjugant.\
                              \nThe length of your susceptibility list is {len(susceptibility)}.\
                              \nPlease make the lengths of this list equal to the number of species.')
         elif (len(x0) != self.n_species):
-            raise IndexError(f'Your number of species is {len(self.n_species)} + donor, recipient and transconjugant.\
+            raise IndexError(f'Your number of species is {self.n_species-3} + donor, recipient and transconjugant.\
                              \nThe length of your initial density list is {len(x0)}.\
                              \nPlease make the lengths of this lists equal to the number of species.')
         elif self.good_alpha != 1: 
