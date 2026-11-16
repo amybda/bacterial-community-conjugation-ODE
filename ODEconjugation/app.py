@@ -1923,17 +1923,17 @@ with ui.navset_card_pill(id="main_tabs"):
                         ui.markdown("""
                         ### Establishing Colonisation Resistance in a Simple Community
                         Let's start with a model with 1 commensal species, which will be used to represent the gut community. The simulation will be run 100 times to generate different interaction matrices, and determine the overall behaviour with the given conditions.<br><br>
-                        In a model where this commensal species does not interact with the donor, recipient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.
+                        In a model where this commensal species very weakly interact with the donor, recipient and transconjugants (connectivity, $C=0$), we can see that all species grow to their maximum carrying capacity.
                         <br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_no_cr():
                             no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
-                            return plot_species_densities(np.arange(0,101), no_cr_trans.mean(axis=0), 1, title='<b>Average Population Density Without Colonisation Resistance Over 100 Runs<b>')
+                            return plot_species_densities(np.arange(0,101), no_cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Weak Colonisation Resistance Over 100 Runs<b>')
                         ui.markdown("""<br>When we then adjust the parameters so that community has strong negative interactions with the donor, recipient and transconjugants (connectivity $C=1$ with $\\sigma=0.6$), the community provides colonisation resistance, suppressing the growth of the donor and recipients so that fewer transconjugants are able to form.<br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_cr():
                             cr_trans = np.load(f'{data_dir}/exp_cr_trans.npy')
-                            return plot_species_densities(np.arange(0,101), cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Colonisation Resistance Over 100 Runs<b>')
+                            return plot_species_densities(np.arange(0,101), cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Strong Colonisation Resistance Over 100 Runs<b>')
                         ui.markdown("""<br>However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.5$ and susceptibility, $\\epsilon=1$), compared to a resistant donor, recipient and transconjugant ($\\epsilon=0.05$), colonisation resistance is removed. The antibiotic strongly negatively affects the growth of the commensal species, while the donor and recipient strains are able to grow much more effectively and conjugation can occur.<br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_cr_perturb():
@@ -1974,7 +1974,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             sus_plot_cr = np.load(f'{data_dir}/exp_cr_sus.npy').mean(axis=2)
                             sus_plot_cr_perturb = np.load(f'{data_dir}/exp_cr_perturb_sus.npy').mean(axis=2)
                             # Render figure layouts
-                            fig = make_subplots(rows=1, cols=3, subplot_titles=("Without Colonisation Resistance (CR)", "With Colonisation Resistance(CR)", "With CR and Antibiotic Perturbation"))
+                            fig = make_subplots(rows=1, cols=3, subplot_titles=("With Weak Colonisation Resistance (CR)", "With Strong Colonisation Resistance(CR)", "With Strong CR and Antibiotic Perturbation"))
                             fig.add_trace(go.Heatmap(x=x, y=y, z=sus_plot_no_cr,
                                                     coloraxis="coloraxis",
                                                     hovertemplate="donor susceptibility: %{x}<br>recipient susceptibility: %{y}<br>transconjugant pop density: %{z}<extra></extra>"),
