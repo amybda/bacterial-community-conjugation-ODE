@@ -88,7 +88,7 @@ class ode_lotka:
             alpha[2] = alpha[1]  # transconjugants have on other species = recipients have on other species
             alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
             # Finding r from self-inhibition
-            steady_state = self.get_growth_rate(alpha, intrinsic_growth)
+            steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
             # Calculate stability
             stability = self.get_stability(alpha, steady_state)
             if stability < 0:  # if the values of eigenvalues less than 0 it is stable
@@ -133,7 +133,7 @@ class ode_lotka:
         alpha[1,2] = -self_inhibition  # recipient-transconjugant interaction is the same as self-inhibition
         alpha[2] = alpha[1]  # transconjugants = recipientsn
         # Finding r from self-inhibition
-        steady_state = self.get_growth_rate(alpha, intrinsic_growth)
+        steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
         # Calculate stability of inputted matrix
         stability = self.get_stability(alpha, steady_state)
         if stability < 0:  # if the values of eigenvalues less than 0 it is stable
@@ -182,7 +182,7 @@ class ode_lotka:
         np.savetxt(f'{filepath}_alpha.csv', self.alpha, delimiter=',')
         np.savetxt(f'{filepath}_r.csv', self.r, delimiter=',')
 
-    def get_growth_rate(self, alpha, intrinsic_growth):
+    def get_growth_rate(self, alpha, intrinsic_growth, donor_equal_recipient=True):
         """Calculates the intrinsic growth rate based on self-inhibition rate (taken from the full interaction matrix
         to maximise the odds of a stable equilibrium).
         r is calculated as the matrix multiplication of ``alpha`` and the steady state.
@@ -197,6 +197,8 @@ class ode_lotka:
             the intrinsic growth rate we'd like to find at steady state for
             if the value is a float, apply it to all species
             if the value is a list, use each indexed value for each species
+        donor_equal_recipient : boolean, default=True
+            determines whether donor and recipient values should be set as the same (reducing variability) or not
         
         Returns
         --------
@@ -208,6 +210,11 @@ class ode_lotka:
         else: 
             steady_state = abs(np.array(intrinsic_growth) + random_noise)  # steady state + noise
         self.r = -np.matmul(alpha, steady_state)  # calculate the r and saves it
+        # Fix r values from steady state when recipient (and donor) and transconjugant are the same
+        if len(alpha) <= 3: mean = 0  # if only drt in matrix, do not correct for sigma values
+        else: mean = np.mean(alpha[0,3:])  # else correct for sigma values in matrix
+        if donor_equal_recipient: self.r[:3] = self.r[:3] - (0.2 * steady_state[:3]) - mean  # change values
+        if not donor_equal_recipient: self.r[1:3] = self.r[1:3] - (0.2 * steady_state[1:3]) - mean  # change values
         return steady_state
 
     def get_stability(self, alpha, steady_state):
