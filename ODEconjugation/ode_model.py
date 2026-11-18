@@ -81,10 +81,12 @@ class ode_lotka:
             if donor_equal_recipient:
                 alpha[0,1] = -self_inhibition  # recipients self-inhibit donors
                 alpha[0,2] = -self_inhibition  # transconjugants are recipients and also self-inhibit
+                #alpha[3:,0] = alpha[3:,0] / 3  # correct so drt are affected more strongly than they affect
                 alpha[1] = alpha[0]  # recipients have on other species = donors have on other species
                 alpha[:,1] = alpha[:,0]  # other species have on recipients = other species have on donors
             # Set the transconjugants to have the same interactions as the recipients (as the same bacteria)
             alpha[1,2] = -self_inhibition  # recipient interaction with transconjugants is the same as self-inhibition
+            #if not donor_equal_recipient: alpha[3:,1] = alpha[3:,1] / 2 # correct so rt affected more than they affect
             alpha[2] = alpha[1]  # transconjugants have on other species = recipients have on other species
             alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
             # Finding r from self-inhibition
@@ -211,10 +213,8 @@ class ode_lotka:
             steady_state = abs(np.array(intrinsic_growth) + random_noise)  # steady state + noise
         self.r = -np.matmul(alpha, steady_state)  # calculate the r and saves it
         # Fix r values from steady state when recipient (and donor) and transconjugant are the same
-        if len(alpha) <= 3: mean = 0  # if only drt in matrix, do not correct for sigma values
-        else: mean = np.mean(alpha[0,3:])  # else correct for sigma values in matrix
-        if donor_equal_recipient: self.r[:3] = self.r[:3] - (0.2 * steady_state[:3]) - mean  # change values
-        if not donor_equal_recipient: self.r[1:3] = self.r[1:3] - (0.2 * steady_state[1:3]) - mean  # change values
+        if donor_equal_recipient: self.r[:3] = self.r[:3] - (0.2 * steady_state[:3])  # change values
+        if not donor_equal_recipient: self.r[1:3] = self.r[1:3] - (0.2 * steady_state[1:3])  # change values
         return steady_state
 
     def get_stability(self, alpha, steady_state):
