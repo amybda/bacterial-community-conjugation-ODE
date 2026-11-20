@@ -286,7 +286,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)), 
                                                        columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_r_init = change_species_r.get()
-                    change_species.solve_ode(t_start=0, t_end=150, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
+                    change_species.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
                     change_species_results.set(change_species.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
@@ -303,7 +303,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_species_alpha.set( pd.DataFrame(change_species.alpha, columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
                     change_species_r.set( pd.DataFrame(change_species.r.reshape(1,len(change_species.r)),
                                                        columns=['donor', 'recipient', 'transconjugants'] + [f'species_{ascii_uppercase[i]}' for i in range(input.params_n_species())]) )
-                    change_species.solve_ode(t_start=0, t_end=150, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
+                    change_species.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, equilibrium=False, t_dr=50)  # solve ode
                     change_species_results.set(change_species.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -409,7 +409,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_conn_alpha_init = change_conn_alpha.get()
                             change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn_r_init = change_conn_r.get()
-                            change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_conn.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -422,7 +422,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_conn.randomise_interaction_matrix(connectivity=input.params_connectivity(), sigma=0.15, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_conn_alpha.set( pd.DataFrame(change_conn.alpha, columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
                             change_conn_r.set( pd.DataFrame(change_conn.r.reshape(1,len(change_conn.r)), columns=['donor', 'recipient', 'transconjugants'] +  [f'species_{ascii_uppercase[i]}' for i in range(5)]) )
-                            change_conn.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_conn.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_conn_results.set(change_conn.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -443,7 +443,7 @@ with ui.navset_card_pill(id="main_tabs"):
                         - additionally the interaction matrix entries between the recipient and transconjugant (and typically the donor) will be the same as the self-inhibition value""")
                         @render_plotly(width='100%')
                         def sigma_vs_strength():
-                            sigma = np.linspace(0, 1.005, int(1.005/0.015)+1)
+                            sigma = np.linspace(0, 1.5, int(1.5/0.01)+1)
                             sigma_rev = sigma[::-1]
                             alpha_mean_negative = np.load(f'{data_dir}/change_negative_sigma_alpha.npy')
                             alpha_mean_positive = np.load(f'{data_dir}/change_positive_sigma_alpha.npy')
@@ -522,7 +522,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_sigma_si_alpha_init = change_sigma_si_alpha.get()
                             change_sigma_si_r.set( pd.DataFrame(change_sigma_si.r.reshape(1,len(change_sigma_si.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_sigma_si_r_init = change_sigma_si_r.get()
-                            change_sigma_si.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_sigma_si.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_sigma_si_results.set(change_sigma_si.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -535,7 +535,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_sigma_si.randomise_interaction_matrix(connectivity=1, sigma=input.params_sigma(), P_m=0, self_inhibition=input.params_s_i(), intrinsic_growth=1)  # initialise interaction matrix
                             change_sigma_si_alpha.set( pd.DataFrame(change_sigma_si.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_sigma_si_r.set( pd.DataFrame(change_sigma_si.r.reshape(1,len(change_sigma_si.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_sigma_si.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_sigma_si.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_sigma_si_results.set(change_sigma_si.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -640,7 +640,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_Pm_alpha_init = change_Pm_alpha.get()
                             change_Pm_r.set( pd.DataFrame(change_Pm.r.reshape(1,len(change_Pm.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_Pm_r_init = change_Pm_r.get()
-                            change_Pm.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_Pm.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_Pm_results.set(change_Pm.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -653,7 +653,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_Pm.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=input.params_Pm(), self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_Pm_alpha.set( pd.DataFrame(change_Pm.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_Pm_r.set( pd.DataFrame(change_Pm.r.reshape(1,len(change_Pm.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_Pm.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_Pm.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_Pm_results.set(change_Pm.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -739,7 +739,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_growth_alpha_init = change_growth_alpha.get()
                             change_growth_r.set( pd.DataFrame(change_growth.r.reshape(1,len(change_growth.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_growth_r_init = change_growth_r.get()
-                            change_growth.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_growth.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_growth_results.set(change_growth.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -753,7 +753,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_growth.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=params_growth)  # initialise interaction matrix
                             change_growth_alpha.set( pd.DataFrame(change_growth.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_growth_r.set( pd.DataFrame(change_growth.r.reshape(1,len(change_growth.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_growth.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
+                            change_growth.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0)  # solve ode
                             change_growth_results.set(change_growth.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -820,7 +820,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_tdr_alpha_init = change_tdr_alpha.get()
                     change_tdr_r.set( pd.DataFrame(change_tdr.r.reshape(1,len(change_tdr.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdr_r_init = change_tdr_r.get()
-                    change_tdr.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, t_dr=int(input.params_tdr()))  # solve ode
+                    change_tdr.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, t_dr=int(input.params_tdr()))  # solve ode
                     change_tdr_results.set(change_tdr.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
@@ -833,7 +833,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_tdr.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdr_alpha.set( pd.DataFrame(change_tdr.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdr_r.set( pd.DataFrame(change_tdr.r.reshape(1,len(change_tdr.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                    change_tdr.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, t_dr=int(input.params_tdr()))  # solve ode
+                    change_tdr.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, t_dr=int(input.params_tdr()))  # solve ode
                     change_tdr_results.set(change_tdr.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -973,7 +973,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_compare_conj_alpha_init = change_compare_conj_alpha.get()
                             change_compare_conj_r.set( pd.DataFrame(change_compare_conj.r.reshape(1,len(change_compare_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_compare_conj_r_init = change_compare_conj_r.get()
-                            change_compare_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_compare_spatial())  # solve ode
+                            change_compare_conj.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_compare_spatial())  # solve ode
                             change_compare_conj_results.set(change_compare_conj.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -986,7 +986,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_compare_conj.randomise_interaction_matrix(connectivity=1, sigma=input.params_compare_sigma(), P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_compare_conj_alpha.set( pd.DataFrame(change_compare_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_compare_conj_r.set( pd.DataFrame(change_compare_conj.r.reshape(1,len(change_compare_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_compare_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_compare_spatial())  # solve ode
+                            change_compare_conj.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_compare_spatial())  # solve ode
                             change_compare_conj_results.set(change_compare_conj.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -1053,7 +1053,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_conj_alpha_init = change_conj_alpha.get()
                     change_conj_r.set( pd.DataFrame(change_conj.r.reshape(1,len(change_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_conj_r_init = change_conj_r.get()
-                    change_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_spatial_conj())  # solve ode
+                    change_conj.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_spatial_conj())  # solve ode
                     change_conj_results.set(change_conj.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
@@ -1066,7 +1066,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_conj.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_conj_alpha.set( pd.DataFrame(change_conj.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_conj_r.set( pd.DataFrame(change_conj.r.reshape(1,len(change_conj.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                    change_conj.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_spatial_conj())  # solve ode
+                    change_conj.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=input.params_simple_conj(), susceptibility=params_susceptibility, drug_level=0, prop_strength=input.params_spatial_conj())  # solve ode
                     change_conj_results.set(change_conj.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -1149,7 +1149,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_tdrug_alpha_init = change_tdrug_alpha.get()
                     change_tdrug_r.set( pd.DataFrame(change_tdrug.r.reshape(1,len(change_tdrug.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdrug_r_init = change_tdrug_r.get()
-                    change_tdrug.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
+                    change_tdrug.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
                     change_tdrug_results.set(change_tdrug.results)
                 # Generate new interaction matrix for model
                 @reactive.effect
@@ -1164,7 +1164,7 @@ with ui.navset_card_pill(id="main_tabs"):
                     change_tdrug.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                     change_tdrug_alpha.set( pd.DataFrame(change_tdrug.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                     change_tdrug_r.set( pd.DataFrame(change_tdrug.r.reshape(1,len(change_tdrug.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                    change_tdrug.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
+                    change_tdrug.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7, t_drug=int(input.params_tdrug()), t_drug_recovery=tdrug_recovery)  # solve ode
                     change_tdrug_results.set(change_tdrug.results)
                 # Plot
                 @render_plotly(width='100%')
@@ -1257,7 +1257,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_drug_strength_alpha_init = change_drug_strength_alpha.get()
                             change_drug_strength_r.set( pd.DataFrame(change_drug_strength.r.reshape(1,len(change_drug_strength.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_drug_strength_r_init = change_drug_strength_r.get()
-                            change_drug_strength.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength())  # solve ode
+                            change_drug_strength.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength())  # solve ode
                             change_drug_strength_results.set(change_drug_strength.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -1270,7 +1270,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_drug_strength.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_drug_strength_alpha.set( pd.DataFrame(change_drug_strength.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_drug_strength_r.set( pd.DataFrame(change_drug_strength.r.reshape(1,len(change_drug_strength.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_drug_strength.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength())  # solve ode
+                            change_drug_strength.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=input.params_drug_strength())  # solve ode
                             change_drug_strength_results.set(change_drug_strength.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -1385,7 +1385,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_sus_alpha_init = change_sus_alpha.get()
                             change_sus_r.set( pd.DataFrame(change_sus.r.reshape(1,len(change_sus.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_sus_r_init = change_sus_r.get()
-                            change_sus.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7)  # solve ode
+                            change_sus.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7)  # solve ode
                             change_sus_results.set(change_sus.results)
                         # Generate new interaction matrix for model
                         @reactive.effect
@@ -1398,7 +1398,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             change_sus.randomise_interaction_matrix(connectivity=1, sigma=0.6, P_m=0, self_inhibition=0.1, intrinsic_growth=1)  # initialise interaction matrix
                             change_sus_alpha.set( pd.DataFrame(change_sus.alpha, columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
                             change_sus_r.set( pd.DataFrame(change_sus.r.reshape(1,len(change_sus.r)), columns=['donor', 'recipient', 'transconjugants', 'species_A']) )
-                            change_sus.solve_ode(t_start=0, t_end=100, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7)  # solve ode
+                            change_sus.solve_ode(t_start=0, t_end=300, x0=params_x0, conjugation_rate=5e-4, susceptibility=params_susceptibility, drug_level=0.7)  # solve ode
                             change_sus_results.set(change_sus.results)
                         # Plot
                         @render_plotly(width='100%')
@@ -1928,17 +1928,17 @@ with ui.navset_card_pill(id="main_tabs"):
                         @render_plotly(width='100%', height='550px')
                         def plot_no_cr():
                             no_cr_trans = np.load(f'{data_dir}/exp_no_cr_trans.npy')
-                            return plot_species_densities(np.arange(0,101), no_cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Weak Colonisation Resistance Over 100 Runs<b>')
+                            return plot_species_densities(np.arange(0,201), no_cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Weak Colonisation Resistance Over 100 Runs<b>')
                         ui.markdown("""<br>When we then adjust the parameters so that community has strong negative interactions with the donor, recipient and transconjugants (connectivity $C=1$ with $\\sigma=0.6$), the community provides colonisation resistance, suppressing the growth of the donor and recipients so that fewer transconjugants are able to form.<br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_cr():
                             cr_trans = np.load(f'{data_dir}/exp_cr_trans.npy')
-                            return plot_species_densities(np.arange(0,101), cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Strong Colonisation Resistance Over 100 Runs<b>')
+                            return plot_species_densities(np.arange(0,201), cr_trans.mean(axis=0), 1, title='<b>Average Population Density With Strong Colonisation Resistance Over 100 Runs<b>')
                         ui.markdown("""<br>However, when we take that same community with the strong negative interactions, and then perturb it with an antibiotic (drug strength, $p=0.5$ and susceptibility, $\\epsilon=1$), compared to a resistant donor, recipient and transconjugant ($\\epsilon=0.05$), colonisation resistance is removed. The antibiotic strongly negatively affects the growth of the commensal species, while the donor and recipient strains are able to grow much more effectively and conjugation can occur.<br><br>""")
                         @render_plotly(width='100%', height='550px')
                         def plot_cr_perturb():
                             cr_perturb = np.load(f'{data_dir}/exp_cr_perturb.npy')
-                            return plot_species_densities(np.arange(0,101), cr_perturb.mean(axis=0), 1, title='<b>Average Population Density When Removing CR with Antibiotics Over 100 Runs<b>')
+                            return plot_species_densities(np.arange(0,201), cr_perturb.mean(axis=0), 1, title='<b>Average Population Density When Removing CR with Antibiotics Over 100 Runs<b>')
                         ui.markdown("""<br>You can see the difference between the final donor, recipient, and transconjugant densities under these three conditions. The donor and recipient grow to a much higher density without colonisation resistance than with it, and a higher density of transconjugants forms. However, with  antibiotics that perturb the community, the donor and recipient grow again. Additionally, as the population density of the perturbed commensal species is decreased, meaning there is less spatial inhibition for both growth and conjugation, and more transconjugants can form than in an unperturbed community, even without colonisation resistance.<br><br>""")
                         @render_plotly(width="100%", height='450px')
                         def cr_bar_plots():
@@ -1948,7 +1948,7 @@ with ui.navset_card_pill(id="main_tabs"):
                             donors = [no_cr_trans[:,0,-1].mean(axis=0), cr_trans[:,0,-1].mean(axis=0), cr_perturb[:,0,-1].mean(axis=0)]
                             recipients = [no_cr_trans[:,1,-1].mean(axis=0), cr_trans[:,1,-1].mean(axis=0), cr_perturb[:,1,-1].mean(axis=0)]
                             trans = [no_cr_trans[:,2,-1].mean(axis=0), cr_trans[:,2,-1].mean(axis=0), cr_perturb[:,2,-1].mean(axis=0)]
-                            condition=['no CR', 'has CR', 'CR + antibiotic']
+                            condition=['weak CR', 'strong CR', 'strong CR + antibiotic']
                             fig = go.Figure()
                             fig.update_layout(plot_bgcolor='#eff5fa')
                             fig.add_trace(go.Bar(name='donors', x=condition, y=donors))
@@ -2020,7 +2020,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 @render_plotly(width='100%')
                                 def plot_AaBa():
                                     species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')
-                                    if input.view_AaBa()=='Graph': return plot_species_densities(np.arange(0,101), species2_model_trans[0].mean(axis=0), 2, title='<b><b>', orientation='h')
+                                    if input.view_AaBa()=='Graph': return plot_species_densities(np.arange(0,201), species2_model_trans[0].mean(axis=0), 2, title='<b><b>', orientation='h')
                             with ui.card():
                                 with ui.card_header():
                                     ui.markdown("""<br><b>Species A Resistant, Species B Susceptible</b>""")
@@ -2032,7 +2032,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 @render_plotly(width='100%')
                                 def plot_AbBa():
                                     species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')
-                                    if input.view_AbBa()=='Graph': return plot_species_densities(np.arange(0,101), species2_model_trans[1].mean(axis=0), 2, title='<b><b>', orientation='h')
+                                    if input.view_AbBa()=='Graph': return plot_species_densities(np.arange(0,201), species2_model_trans[1].mean(axis=0), 2, title='<b><b>', orientation='h')
                             with ui.card():
                                 with ui.card_header():
                                     ui.markdown("""<br><b>Species A Suscpetible, Species B Resistant</b>""")
@@ -2044,7 +2044,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 @render_plotly(width='100%')
                                 def plot_AaBb():
                                     species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')
-                                    if input.view_AaBb()=='Graph': return plot_species_densities(np.arange(0,101), species2_model_trans[2].mean(axis=0), 2, title='<b><b>', orientation='h')
+                                    if input.view_AaBb()=='Graph': return plot_species_densities(np.arange(0,201), species2_model_trans[2].mean(axis=0), 2, title='<b><b>', orientation='h')
                             with ui.card():
                                 with ui.card_header():
                                     ui.markdown("""<br><b>Species A Resistant, Species B Resistant</b>""")
@@ -2056,7 +2056,7 @@ with ui.navset_card_pill(id="main_tabs"):
                                 @render_plotly(width='100%')
                                 def plot_AbBb():
                                     species2_model_trans = np.load(f'{data_dir}/exp_2species_model.npy')
-                                    if input.view_AbBb()=='Graph': return plot_species_densities(np.arange(0,101), species2_model_trans[3].mean(axis=0), 2, title='<b><b>', orientation='h')
+                                    if input.view_AbBb()=='Graph': return plot_species_densities(np.arange(0,201), species2_model_trans[3].mean(axis=0), 2, title='<b><b>', orientation='h')
                         ui.markdown("""<br>Each plot above is explained on the explanation tab. A summary of these results can be seen in the bar chart below. The donors and recipients grow best without any competition from Species A or B, when both are susceptible to antibiotics and are killed. Even when Species A is resistant, as it has weak interactions with the donor and recipient, it has little to no effect on the growth of the donors and recipients, though it can physically block the contact necessary for transconjugants to form. Conversley, with a resistant Species B, it has very strong interactions with the donor and recipient, as well as blocking contact between them, supressing the growth of transconjugants. Finally, with a resistant Species A and Species B, the strong negative interactions from Species B, as well as the physical competition from both commensal species blocking physical contact strongly supresses transconjugant growth.<br>""")
                         @render_plotly(width="100%", height='450px')
                         def species2_bar_plots():
