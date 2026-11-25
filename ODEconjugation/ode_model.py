@@ -34,7 +34,8 @@ class ode_lotka:
         self.alpha = np.zeros([n_species, n_species])
         self.r = np.zeros([n_species])
     
-    def randomise_interaction_matrix(self, connectivity, sigma, P_m, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
+    def randomise_interaction_matrix(self, connectivity, sigma, P_m, self_inhibition, intrinsic_growth=1,
+                                     donor_equal_recipient=True, constrain_drt=True):
         """A function that randomly populates the interaction matrix, based on certain input parameters. 
         It will repeat until it creates a matrix that will have a dynamic equilibrium (is stable) or if it is looped
         over 50600 times, in which case it will prompt the entry of new interaction matrix parameters to try to create
@@ -56,7 +57,10 @@ class ode_lotka:
             if the value is a float, apply it to all species
             if the value is a list, use each indexed value for each species
         donor_equal_recipient : boolean, default=True
-            determines whether donor and recipient values should be set as the same (reducing variability) or not"""
+            determines whether donor and recipient values should be set as the same (reducing variability) or not
+        constrain_drt : boolean, default=True
+            determines whether or not to constrain the drt interactions/growth in the community, to reduce variability
+            and ensure there is always another species growing in community"""
         self.good_alpha = 0  # reset alpha to allow new reassignment if necessary
         checks = 0
         while self.good_alpha == 0:  # repeat until the matrix is stable
@@ -81,28 +85,35 @@ class ode_lotka:
             if donor_equal_recipient:
                 alpha[0,1] = -self_inhibition  # recipients self-inhibit donors
                 alpha[0,2] = -self_inhibition  # transconjugants are recipients and also self-inhibit
-                #alpha[3:,0] = alpha[3:,0] / 3  # correct so drt are affected more strongly than they affect
                 alpha[1] = alpha[0]  # recipients have on other species = donors have on other species
                 alpha[:,1] = alpha[:,0]  # other species have on recipients = other species have on donors
             # Set the transconjugants to have the same interactions as the recipients (as the same bacteria)
             alpha[1,2] = -self_inhibition  # recipient interaction with transconjugants is the same as self-inhibition
-            #if not donor_equal_recipient: alpha[3:,1] = alpha[3:,1] / 2 # correct so rt affected more than they affect
             alpha[2] = alpha[1]  # transconjugants have on other species = recipients have on other species
             alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
             # Finding r from self-inhibition
             steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
-            # Calculate stability
+            # Calculate stability and av. interaction matrix values
             stability = self.get_stability(alpha, steady_state)
+            if self.n_species > 3:
+                eff_comm = np.mean(alpha[3:,0])
+                eff_drt = np.mean(alpha[0,3:])
+            else: 
+                eff_comm = 0
+                eff_drt = 0
             if stability < 0:  # if the values of eigenvalues less than 0 it is stable
-                self.good_alpha = 1  # allow it to break loop
-                self.alpha = alpha  # assign alpha value
+                if ((constrain_drt == False) or
+                    (constrain_drt == True and (np.isclose(eff_comm, eff_drt, rtol=0.8) or eff_comm < eff_drt))):
+                    self.good_alpha = 1  # allow it to break loop
+                    self.alpha = alpha  # assign alpha value
             else: checks += 1
             # Set up automatic break clause if it takes too long to find a good interaction matrix
-            if checks > 60000:
+            if checks > 70000:
                 self.good_alpha = -1
-                raise AttributeError('Interaction matrix parameters are hard to solve. Try again with different parameters.')
+                raise AttributeError('Interaction matrix hard to solve. Try again with different parameters.')
 
-    def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
+    def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1,
+                                        donor_equal_recipient=True, constrain_drt=True):
         """A function that allows custom entry of an interaction matrix, and self inhibition rates, and then will
         calculate the growth rate and ensure it is stable.
         
@@ -117,7 +128,10 @@ class ode_lotka:
             if the value is a float, apply it to all species
             if the value is a list, use each indexed value for each species
         donor_equal_recipient : boolean, default=True
-            determines whether donor and recipient values should be set as the same (reducing variability) or not"""
+            determines whether donor and recipient values should be set as the same (reducing variability) or not
+        constrain_drt : boolean, default=True
+            determines whether or not to constrain the drt interactions/growth in the community, to reduce variability
+            and ensure there is always another species growing in community"""
         self.good_alpha = 0  # reset alpha to allow new reassignment if necessary
         # Check the matrix is the correct size and sets up an automatic break if not
         if alpha.shape != (self.n_species, self.n_species):
@@ -131,19 +145,25 @@ class ode_lotka:
             alpha[0,1] = -self_inhibition  # recipients self-inhibit donors
             alpha[0,2] = -self_inhibition  # transconjugants are recipients and also self-inhibit
             alpha[1] = alpha[0]  # recipients = donors
+            alpha[:,1] = alpha[:,0]  # other species have on recipients = other species have on donors
         # Overwrite the transconjugants to have the same interactions as the recipients (as the same bacteria)
         alpha[1,2] = -self_inhibition  # recipient-transconjugant interaction is the same as self-inhibition
-        alpha[2] = alpha[1]  # transconjugants = recipientsn
+        alpha[2] = alpha[1]  # transconjugants = recipients
+        alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
         # Finding r from self-inhibition
         steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
-        # Calculate stability of inputted matrix
+        # Calculate stability and av. interaction matrix values
         stability = self.get_stability(alpha, steady_state)
-        if stability < 0:  # if the values of eigenvalues less than 0 it is stable
-            self.good_alpha = 1  # allow it to break loop
-            self.alpha = alpha  # assign alpha value
-        else:
-            raise AttributeError('This interaction matrix does not lead to steady state equilibrium - \
-                                 please try again with a new values.')
+        if self.n_species > 3:
+            eff_comm = np.mean(alpha[3:,0])
+            eff_drt = np.mean(alpha[0,3:])
+        else: 
+            eff_comm = 0
+            eff_drt = 0
+        if stability < 0 and ((constrain_drt == False) or  # if the values of eigenvalues less than 0 it is stable
+                              (constrain_drt == True and (np.isclose(eff_comm, eff_drt, rtol=0.8) or eff_comm < eff_drt))): 
+                self.good_alpha = 1  # allow it to break loop
+                self.alpha = alpha  # assign alpha value
     
     def set_interaction_matrix(self, alpha, intrinsic_growth):
         """A function that allows you to set the interaction matrix, self inhibition rates, and growth
