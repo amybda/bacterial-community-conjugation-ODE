@@ -480,7 +480,7 @@ class ode_lotka:
                     self.results.y = np.concat([self.results.y, results.y[:,1:]], axis=1)
         
     def plot_results(self, t, y, title, figsize=(7,6), save_fig=False, filename='microbiota_density',
-                     ylim=None, drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
+                     ylim=None, legend=None, drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
         """Plots the graph of the community finding equilibrium, and potentially saves the figure.
         
         Parameters
@@ -499,6 +499,8 @@ class ode_lotka:
             the filename if the figure is saved
         ylim : list, default=None
             sets the y-limits for the plot, if given
+        legend : list, default=None
+            sets the legend for the plot, if given
         drt_colours : list, default=['magenta', 'b', 'black']
             colours to use to plot the donor, recipient, and transconjugant (distinct from rest of colour cycle)
         cmap : colourmap, default='Spectral'
@@ -507,8 +509,9 @@ class ode_lotka:
             the maximum number of discrete colours to divide the cmap into"""
         fig, ax = plt.subplots(figsize=figsize)
         ax.set_prop_cycle(self.set_colours(drt_colours, cmap, max_colours))
-        plt.plot(t, y,
-                 label=['Donor', 'Recipient', 'Transconjugants'] + [f'Species {i+1}' for i in range(self.n_species-3)])
+        if not legend: 
+            legend = ['Donor', 'Recipient', 'Transconjugants'] + [f'Species {i+1}' for i in range(self.n_species-3)]
+        plt.plot(t, y, label=legend)
         ax.set_xlabel('Time')
         ax.set_ylabel('Population Density')
         if ylim != None: plt.ylim(ylim)
