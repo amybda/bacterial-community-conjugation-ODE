@@ -110,7 +110,7 @@ class ode_lotka:
             # Set up automatic break clause if it takes too long to find a good interaction matrix
             if checks > 70000:
                 self.good_alpha = -1
-                raise AttributeError('Interaction matrix hard to solve. Try again with different parameters.')
+                print('Interaction matrix hard to solve. Try again with different parameters.')
 
     def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1,
                                         donor_equal_recipient=True, constrain_drt=True):
@@ -413,8 +413,8 @@ class ode_lotka:
                              \nThe length of your initial density list is {len(x0)}.\
                              \nPlease make the lengths of this lists equal to the number of species.')
         elif self.good_alpha != 1: 
-            raise AttributeError('You have no valid interaction matrix to run this simulation.\
-                                 Please fix your interaction matrix before trying again.')
+            print('You have no valid interaction matrix to run this simulation.\
+                  Please fix your interaction matrix before trying again.')
         # If interaction matrix works and no other errors, run ODEs to seem community 
         elif self.good_alpha == 1:
             # Determine drug strengths over time
