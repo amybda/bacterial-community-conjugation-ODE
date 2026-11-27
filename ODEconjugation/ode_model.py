@@ -34,7 +34,8 @@ class ode_lotka:
         self.alpha = np.zeros([n_species, n_species])
         self.r = np.zeros([n_species])
     
-    def randomise_interaction_matrix(self, connectivity, sigma, P_m, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
+    def randomise_interaction_matrix(self, connectivity, sigma, P_m, self_inhibition, intrinsic_growth=1,
+                                     donor_equal_recipient=True, constrain_drt=True):
         """A function that randomly populates the interaction matrix, based on certain input parameters. 
         It will repeat until it creates a matrix that will have a dynamic equilibrium (is stable) or if it is looped
         over 50600 times, in which case it will prompt the entry of new interaction matrix parameters to try to create
@@ -56,7 +57,10 @@ class ode_lotka:
             if the value is a float, apply it to all species
             if the value is a list, use each indexed value for each species
         donor_equal_recipient : boolean, default=True
-            determines whether donor and recipient values should be set as the same (reducing variability) or not"""
+            determines whether donor and recipient values should be set as the same (reducing variability) or not
+        constrain_drt : boolean, default=True
+            determines whether or not to constrain the drt interactions/growth in the community, to reduce variability
+            and ensure there is always another species growing in community"""
         self.good_alpha = 0  # reset alpha to allow new reassignment if necessary
         checks = 0
         while self.good_alpha == 0:  # repeat until the matrix is stable
@@ -88,19 +92,28 @@ class ode_lotka:
             alpha[2] = alpha[1]  # transconjugants have on other species = recipients have on other species
             alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
             # Finding r from self-inhibition
-            steady_state = self.get_growth_rate(alpha, intrinsic_growth)
-            # Calculate stability
+            steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
+            # Calculate stability and av. interaction matrix values
             stability = self.get_stability(alpha, steady_state)
+            if self.n_species > 3:
+                eff_comm = np.mean(alpha[3:,0])
+                eff_drt = np.mean(alpha[0,3:])
+            else: 
+                eff_comm = 0
+                eff_drt = 0
             if stability < 0:  # if the values of eigenvalues less than 0 it is stable
-                self.good_alpha = 1  # allow it to break loop
-                self.alpha = alpha  # assign alpha value
+                if ((constrain_drt == False) or
+                    (constrain_drt == True and (np.isclose(eff_comm, eff_drt, rtol=0.8) or eff_comm < eff_drt))):
+                    self.good_alpha = 1  # allow it to break loop
+                    self.alpha = alpha  # assign alpha value
             else: checks += 1
             # Set up automatic break clause if it takes too long to find a good interaction matrix
-            if checks > 60000:
+            if checks > 70000:
                 self.good_alpha = -1
-                raise AttributeError('Interaction matrix parameters are hard to solve. Try again with different parameters.')
+                print('Interaction matrix hard to solve. Try again with different parameters.')
 
-    def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1, donor_equal_recipient=True):
+    def enter_custom_interaction_matrix(self, alpha, self_inhibition, intrinsic_growth=1,
+                                        donor_equal_recipient=True, constrain_drt=True):
         """A function that allows custom entry of an interaction matrix, and self inhibition rates, and then will
         calculate the growth rate and ensure it is stable.
         
@@ -115,7 +128,10 @@ class ode_lotka:
             if the value is a float, apply it to all species
             if the value is a list, use each indexed value for each species
         donor_equal_recipient : boolean, default=True
-            determines whether donor and recipient values should be set as the same (reducing variability) or not"""
+            determines whether donor and recipient values should be set as the same (reducing variability) or not
+        constrain_drt : boolean, default=True
+            determines whether or not to constrain the drt interactions/growth in the community, to reduce variability
+            and ensure there is always another species growing in community"""
         self.good_alpha = 0  # reset alpha to allow new reassignment if necessary
         # Check the matrix is the correct size and sets up an automatic break if not
         if alpha.shape != (self.n_species, self.n_species):
@@ -129,19 +145,25 @@ class ode_lotka:
             alpha[0,1] = -self_inhibition  # recipients self-inhibit donors
             alpha[0,2] = -self_inhibition  # transconjugants are recipients and also self-inhibit
             alpha[1] = alpha[0]  # recipients = donors
+            alpha[:,1] = alpha[:,0]  # other species have on recipients = other species have on donors
         # Overwrite the transconjugants to have the same interactions as the recipients (as the same bacteria)
         alpha[1,2] = -self_inhibition  # recipient-transconjugant interaction is the same as self-inhibition
-        alpha[2] = alpha[1]  # transconjugants = recipientsn
+        alpha[2] = alpha[1]  # transconjugants = recipients
+        alpha[:,2] = alpha[:,1]  # other species have on transconjugants = other species have on recipients
         # Finding r from self-inhibition
-        steady_state = self.get_growth_rate(alpha, intrinsic_growth)
-        # Calculate stability of inputted matrix
+        steady_state = self.get_growth_rate(alpha, intrinsic_growth, donor_equal_recipient)
+        # Calculate stability and av. interaction matrix values
         stability = self.get_stability(alpha, steady_state)
-        if stability < 0:  # if the values of eigenvalues less than 0 it is stable
-            self.good_alpha = 1  # allow it to break loop
-            self.alpha = alpha  # assign alpha value
-        else:
-            raise AttributeError('This interaction matrix does not lead to steady state equilibrium - \
-                                 please try again with a new values.')
+        if self.n_species > 3:
+            eff_comm = np.mean(alpha[3:,0])
+            eff_drt = np.mean(alpha[0,3:])
+        else: 
+            eff_comm = 0
+            eff_drt = 0
+        if stability < 0 and ((constrain_drt == False) or  # if the values of eigenvalues less than 0 it is stable
+                              (constrain_drt == True and (np.isclose(eff_comm, eff_drt, rtol=0.8) or eff_comm < eff_drt))): 
+                self.good_alpha = 1  # allow it to break loop
+                self.alpha = alpha  # assign alpha value
     
     def set_interaction_matrix(self, alpha, intrinsic_growth):
         """A function that allows you to set the interaction matrix, self inhibition rates, and growth
@@ -182,7 +204,7 @@ class ode_lotka:
         np.savetxt(f'{filepath}_alpha.csv', self.alpha, delimiter=',')
         np.savetxt(f'{filepath}_r.csv', self.r, delimiter=',')
 
-    def get_growth_rate(self, alpha, intrinsic_growth):
+    def get_growth_rate(self, alpha, intrinsic_growth, donor_equal_recipient=True):
         """Calculates the intrinsic growth rate based on self-inhibition rate (taken from the full interaction matrix
         to maximise the odds of a stable equilibrium).
         r is calculated as the matrix multiplication of ``alpha`` and the steady state.
@@ -197,6 +219,8 @@ class ode_lotka:
             the intrinsic growth rate we'd like to find at steady state for
             if the value is a float, apply it to all species
             if the value is a list, use each indexed value for each species
+        donor_equal_recipient : boolean, default=True
+            determines whether donor and recipient values should be set as the same (reducing variability) or not
         
         Returns
         --------
@@ -208,6 +232,9 @@ class ode_lotka:
         else: 
             steady_state = abs(np.array(intrinsic_growth) + random_noise)  # steady state + noise
         self.r = -np.matmul(alpha, steady_state)  # calculate the r and saves it
+        # Fix r values from steady state when recipient (and donor) and transconjugant are the same
+        if donor_equal_recipient: self.r[:3] = self.r[:3] - (0.2 * steady_state[:3])  # change values
+        if not donor_equal_recipient: self.r[1:3] = self.r[1:3] - (0.2 * steady_state[1:3])  # change values
         return steady_state
 
     def get_stability(self, alpha, steady_state):
@@ -386,8 +413,8 @@ class ode_lotka:
                              \nThe length of your initial density list is {len(x0)}.\
                              \nPlease make the lengths of this lists equal to the number of species.')
         elif self.good_alpha != 1: 
-            raise AttributeError('You have no valid interaction matrix to run this simulation.\
-                                 Please fix your interaction matrix before trying again.')
+            print('You have no valid interaction matrix to run this simulation.\
+                  Please fix your interaction matrix before trying again.')
         # If interaction matrix works and no other errors, run ODEs to seem community 
         elif self.good_alpha == 1:
             # Determine drug strengths over time
@@ -453,7 +480,7 @@ class ode_lotka:
                     self.results.y = np.concat([self.results.y, results.y[:,1:]], axis=1)
         
     def plot_results(self, t, y, title, figsize=(7,6), save_fig=False, filename='microbiota_density',
-                     ylim=None, drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
+                     ylim=None, legend=None, drt_colours=['magenta', 'b', 'black'], cmap='Spectral', max_colours=26):
         """Plots the graph of the community finding equilibrium, and potentially saves the figure.
         
         Parameters
@@ -472,6 +499,8 @@ class ode_lotka:
             the filename if the figure is saved
         ylim : list, default=None
             sets the y-limits for the plot, if given
+        legend : list, default=None
+            sets the legend for the plot, if given
         drt_colours : list, default=['magenta', 'b', 'black']
             colours to use to plot the donor, recipient, and transconjugant (distinct from rest of colour cycle)
         cmap : colourmap, default='Spectral'
@@ -480,8 +509,9 @@ class ode_lotka:
             the maximum number of discrete colours to divide the cmap into"""
         fig, ax = plt.subplots(figsize=figsize)
         ax.set_prop_cycle(self.set_colours(drt_colours, cmap, max_colours))
-        plt.plot(t, y,
-                 label=['Donor', 'Recipient', 'Transconjugants'] + [f'Species {i+1}' for i in range(self.n_species-3)])
+        if not legend: 
+            legend = ['Donor', 'Recipient', 'Transconjugants'] + [f'Species {i+1}' for i in range(self.n_species-3)]
+        plt.plot(t, y, label=legend)
         ax.set_xlabel('Time')
         ax.set_ylabel('Population Density')
         if ylim != None: plt.ylim(ylim)
